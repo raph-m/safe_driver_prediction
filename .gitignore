@@ -99,3 +99,14 @@ ENV/
 
 # mypy
 .mypy_cache/
+/test.csv
+/train.csv
+.idea/inspectionProfiles/
+.idea/misc.xml
+.idea/modules.xml
+.idea/safe_driver_prediction.iml
+.idea/workspace.xml
+course_project.pdf
+notes
+.idea/vcs.xml
+
