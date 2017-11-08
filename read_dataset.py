@@ -1,5 +1,4 @@
 import numpy as np
-import csv
 
 # opening and reading train and test dataset
 # dataset size: train 595213 rows and 59 columns. first column is diver_id, and second column is target (0 or 1). The other columns are features
