@@ -1,8 +1,10 @@
 import numpy as np
 
-# opening and reading train and test dataset
-# dataset size: train 595213 rows and 59 columns. first column is diver_id, and second column is target (0 or 1). The other columns are features
-# dataset size : test 892817 rows and 58 columns. same structure as train dataset without target column.
+#  opening and reading train and test dataset
+#  dataset size: train 595213 rows and 59 columns. first column is diver_id, and
+# second column is target (0 or 1). The other columns are features
+#  dataset size : test 892817 rows and 58 columns. same structure as train dataset without target column.
+
 
 def read_dataset(size_training, size_testing):
     train_data = np.loadtxt('train.csv', delimiter = ',', skiprows = 1)
