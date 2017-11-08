@@ -18,23 +18,32 @@ import pandas as pd
 
 # Importing the dataset
 dataset = pd.read_csv('train.csv')
-X = dataset.iloc[:, 2:52].values
+X = dataset.iloc[:, 2:-1].values
 
 y = dataset.iloc[:, 1].values
-
-print(y)
 
 categorical_features = [1]
 #  en réalité c'est: [1, 3, 4, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
 #  sauf que scikit n'accepte pas les valeurs négatives apparemment en plus il y a un problème même avec les valeurs qui
 #  sont apparemment postives. Je pense qu'il faut les transformer en int
 
+X[:, 1].dtype = np.dtype(np.int32)
+number_of_negatives = 0
+for i in categorical_features:
+    min = 0
+    for j in range(len(X[:, i])):
+        # TODO: il faut remettre à des valeurs positives toutes les données catégoriques
+        continue
+
+print("number_of_negatives")
+print(number_of_negatives)
+
 
 # Encoding categorical data
-# from sklearn.preprocessing import OneHotEncoder
-# onehotencoder = OneHotEncoder(categorical_features = categorical_features)
-# X = onehotencoder.fit_transform(X).toarray()
-# X = X[:, 1:]
+from sklearn.preprocessing import OneHotEncoder
+onehotencoder = OneHotEncoder(categorical_features = categorical_features)
+X = onehotencoder.fit_transform(X).toarray()
+X = X[:, 1:]
 
 # Splitting the dataset into the Training set and Test set
 from sklearn.model_selection import train_test_split
@@ -58,7 +67,7 @@ classifier = Sequential()
 
 # Adding the input layer and the first hidden layer
 # specify input size and output size because
-classifier.add(Dense(output_dim = 15, init = 'uniform', activation = 'relu', input_dim = 50))
+classifier.add(Dense(output_dim = 15, init = 'uniform', activation = 'relu', input_dim = 30))
 
 # Adding the second hidden layer
 # no need to specify input-size since it is the output size of the previous layer
