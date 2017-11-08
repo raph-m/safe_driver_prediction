@@ -22,5 +22,3 @@ def read_dataset(size_training, size_testing):
     np.random.shuffle(rd_test_inst)
 
     return train_data[rd_train_inst[0:size_training],:], test_data[rd_test_inst[0:size_testing],:]
-
-print(read_dataset(3, 3))
