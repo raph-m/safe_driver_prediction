@@ -18,4 +18,18 @@ Ce qu'il faut faire:
 - tester d'autres architectures
 - implémenter un modèle plus basique (genre multilinéaire quoi)
 - faire de la feature selection sur les valeurs continues
-- trouver un moyen de gérer le fait qu'il y a très peu de valeurs labellées à 1
+- trouver un moyen de gérer le fait qu'il y a très peu de valeurs labelxlées à 1
+- notamment il faudrait deja voir les resultats avec une simple régression linéaire
+
+
+une page intéressante pour répondre à notre problème (imbalanced classes):
+https://svds.com/learning-imbalanced-classes/
+
+comprendre le Gini coefficient:
+https://www.kaggle.com/batzner/gini-coefficient-an-intuitive-explanation
+en gros ca représente la quantité de 'swap' qu'il faudrait faire pour remettre nos predictions
+dans le bon ordre
+
+une analyse préliminaire des données:
+https://www.kaggle.com/headsortails/steering-wheel-of-fortune-porto-seguro-eda
+

@@ -14,11 +14,30 @@ names = names_str.split(",")
 # print(indexes)
 
 
-indexes = []
+# indexes = []
+#
+# for i in range(len(names)):
+#     name = names[i]
+#     print(name[len(name)-3:len(name)])
+#     if name[len(name)-3:len(name)] not in ["cat", "bin"]:
+#         indexes.append(i)
+# print(indexes)
 
-for i in range(len(names)):
-    name = names[i]
-    print(name[len(name)-3:len(name)])
-    if name[len(name)-3:len(name)] not in ["cat", "bin"]:
-        indexes.append(i)
-print(indexes)
+import matplotlib.pyplot as plt
+import numpy as np
+y_test = np.loadtxt("y_test")
+y_pred = np.loadtxt("y_pred")
+
+
+def plot_accuracy(a, p):
+    accuracies = []
+    for i in range(1, 100):
+
+        pred = p > float(i)/100
+
+        accuracies.append(np.mean(pred == (a>0.5)))
+    plt.plot(range(1, 100), accuracies)
+    print(accuracies)
+    plt.show()
+
+plot_accuracy(y_test, y_pred)

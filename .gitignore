@@ -111,3 +111,6 @@ notes
 .idea/vcs.xml
 
 /train_small.csv
+/y_pred
+/y_test
+/tryouts.ipynb
