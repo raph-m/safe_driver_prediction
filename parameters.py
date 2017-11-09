@@ -5,7 +5,7 @@ epochs = 10
 layers = [190, 30, 6, 1]
 activation_functions = ["relu", "relu", "sigmoid"]
 loss = "cross_entropy"
-alpha = 19
+alpha = 1
 
 parameters = {
     "feature_selection": {

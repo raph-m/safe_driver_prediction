@@ -117,13 +117,8 @@ f = open("results.json", "r")
 results_txt = f.read()
 f.close()
 results = json.loads(results_txt)
-results.append(parameters)
+# décommenter cette ligne si vous voulez sauvegarder les résultats
+# results.append(parameters)
 f= open("results.json", "w")
 f.write(json.dumps(results))
 f.close()
-# conclusion de ce que j'ai fait: j'ai de temps en temps de problèmes pour charger toutes les données
-# (j'ai des memory errors) donc le mieux reste d'éliminer certaines variables qui ne sont pas explicatives
-# Sinon quand ca marchait j'avais toujours soit que des prédictions fausses soit que des prédictions vraies
-# donc soit notre modèle n'arrive pas à saisir la logique du truc et donc il met tout à zéro.
-# peut etre aussi que comme il y a plus de zeros que de 1 (3% de 1) le modèle tend à mettre tout le monde
-# a zero si on ne sanctionne pas le 1
