@@ -19,6 +19,6 @@ indexes = []
 for i in range(len(names)):
     name = names[i]
     print(name[len(name)-3:len(name)])
-    if name[len(name)-3:len(name)] in ["cat", "bin"]:
+    if name[len(name)-3:len(name)] not in ["cat", "bin"]:
         indexes.append(i)
 print(indexes)

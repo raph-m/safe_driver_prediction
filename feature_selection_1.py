@@ -1,11 +1,17 @@
 #  feature selection on categorical data using infogain or chisquared:
 
 # Feature selection with the Information Gain measure
+import json
 
 import numpy as np
 from math import log
 import pandas as pd
-import json
+
+# categorical and binary features
+categorical_features = [3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 19, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 53, 54, 55, 56, 57, 58]
+
+# continuous values
+continuous_values = [2, 4, 15, 16, 20, 21, 22, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
 
 
 def entropy(s):
@@ -54,19 +60,13 @@ def select_categorical_features(number_of_features = 10, method = "infogain"):
         gain = infogain(X, y)
     else:
         return
-    print("gain")
-    print(gain)
     index = np.argsort(gain)[::-1]
 
     real_indexes = []
 
-    print("index")
-    print(index)
-
     for i in index:
         real_indexes.append(categorical_features[i])
 
-    print("real indexes")
     return real_indexes[:number_of_features]
 
 
@@ -97,7 +97,7 @@ def get_cached_features(feature_selection, recompute=False):
     if not found:
         cache.append({
             "name": name,
-            "feature_selection": feature_selection,
+            "number_of_features": number_of_features,
             "indexes": indexes
         })
     f = open("feature_selection_cache.json", "w")
