@@ -8,8 +8,40 @@ import tensorflow as tf
 
 # Installing Keras
 # pip install --upgrade keras
+from util import my_loss
 
-alpha = 50
+
+
+feature_selection = "infogain"
+number_of_features = 10
+batch_size = 10000
+epochs = 10
+layers = [164, 30, 6, 1]
+activation_functions = ["relu", "relu", "sigmoid"]
+loss = "cross_entropy"
+alpha = 19
+
+parameters = {
+    "feature_selection": {
+        "name": feature_selection,
+        "number_of_features": number_of_features
+    },
+    "classifier": {
+        "name": "neural_network",
+        "batch_size": batch_size,
+        "epochs": epochs,
+        "layers": layers,
+        "activation_functions": activation_functions,
+        "loss":
+            {
+                "name": loss,
+                "alpha": alpha
+            }
+    }
+}
+
+if loss == "cross_entropy":
+    loss = my_loss
 
 
 def gini(actual, pred, cmpcol=0, sortcol=1):
@@ -27,9 +59,6 @@ def gini_normalized(a, p):
     return gini(a, p) / gini(a, a)
 
 
-def my_loss(actual, pred):
-    return tf.reduce_mean(-tf.log(pred) * actual * alpha - tf.log(1-pred) * (1 - actual))
-
 # Part 1 - Data Preprocessing
 
 # Importing the libraries
@@ -39,7 +68,12 @@ import pandas as pd
 
 # Importing the dataset
 dataset = pd.read_csv('train.csv')
-X = dataset.iloc[:, 2:-1].values
+
+from feature_selection_1 import select_categorical_features, get_cached_features
+
+selected_features = get_cached_features(parameters["feature_selection"])
+
+X = dataset.iloc[:, selected_features].values
 
 y = dataset.iloc[:, 1].values
 
@@ -51,9 +85,9 @@ categorical_features = [1, 3, 4, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
 #  sauf que scikit n'accepte pas les valeurs négatives apparemment en plus il y a un problème même avec les valeurs qui
 #  sont apparemment positives. Je pense qu'il faut les transformer en int
 
-X[:, 1].dtype = np.dtype(np.int32)
+# X[:, 1].dtype = np.dtype(np.int32)
 number_of_negatives = 0
-for i in categorical_features:
+for i in range(len(selected_features)):
     min = 0
     for j in range(len(X[:, i])):
         if X[j, i] < min:
@@ -62,12 +96,10 @@ for i in categorical_features:
     print(min)
     for j in range(len(X[:, i])):
         X[j, i] -= min
-    for j in range(20):
-        continue
 
 # Encoding categorical data
 from sklearn.preprocessing import OneHotEncoder
-onehotencoder = OneHotEncoder(categorical_features = categorical_features)
+onehotencoder = OneHotEncoder(categorical_features = 'all')
 X = onehotencoder.fit_transform(X).toarray()
 X = X[:, 1:]
 
@@ -93,20 +125,21 @@ classifier = Sequential()
 
 # Adding the input layer and the first hidden layer
 # specify input size and output size because
-classifier.add(Dense(output_dim = 30, init = 'uniform', activation = 'relu', input_dim = 104))  # input dim =225 normalement
+classifier.add(Dense(output_dim = layers[1], init = 'uniform', activation = activation_functions[0], input_dim = layers[0]))  # input dim =225 normalement
 
 # Adding the second hidden layer
 # no need to specify input-size since it is the output size of the previous layer
-classifier.add(Dense(output_dim = 6, init = 'uniform', activation = 'relu'))
+for i in range(len(layers)-3):
+    classifier.add(Dense(output_dim = layers[i+2], init = 'uniform', activation = activation_functions[i+1]))
 
 # Adding the output layer
 classifier.add(Dense(output_dim = 1, init = 'uniform', activation = 'sigmoid'))
 
 # Compiling the ANN
-classifier.compile(optimizer = 'adam', loss = my_loss, metrics = ['accuracy'])
+classifier.compile(optimizer = 'adam', loss = loss, metrics = ['accuracy'])
 
 # Fitting the ANN to the Training set
-classifier.fit(X_train, y_train, batch_size = 1000, epochs = 1)
+classifier.fit(X_train, y_train, batch_size = batch_size, epochs = epochs)
 
 # Part 3 - Making the predictions and evaluating the model
 

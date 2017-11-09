@@ -4,13 +4,21 @@ names_str = "id,target,ps_ind_01,ps_ind_02_cat,ps_ind_03,ps_ind_04_cat,ps_ind_05
 
 names = names_str.split(",")
 
-indexes = []
+# indexes = []
+#
+# for i in range(len(names)):
+#     name = names[i]
+#     print(name[len(name)-3:len(name)])
+#     if name[len(name)-3:len(name)] == "cat":
+#         indexes.append(i-2)
+# print(indexes)
 
-print(names[25])
+
+indexes = []
 
 for i in range(len(names)):
     name = names[i]
     print(name[len(name)-3:len(name)])
-    if name[len(name)-3:len(name)] == "cat":
-        indexes.append(i-2)
+    if name[len(name)-3:len(name)] in ["cat", "bin"]:
+        indexes.append(i)
 print(indexes)
