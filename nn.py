@@ -98,15 +98,15 @@ X_test = sc.transform(X_test)
 classifier = Sequential()
 
 # Adding the input layer and the first hidden layer
-classifier.add(Dense(output_dim = layers[1], init = 'uniform', activation = activation_functions[0], input_dim =len(X[0, :])))
+classifier.add(Dense(units = layers[1], kernel_initializer = 'uniform', activation = activation_functions[0], input_dim =layers[0]))  # input dim =225 normalement
 
 # Adding the second hidden layer
 # no need to specify input-size since it is the output size of the previous layer
 for i in range(len(layers)-3):
-    classifier.add(Dense(output_dim=layers[i+2], init = 'uniform', activation = activation_functions[i+1]))
+    classifier.add(Dense(units=layers[i+2], kernel_initializer = 'uniform', activation = activation_functions[i+1]))
 
 # Adding the output layer
-classifier.add(Dense(output_dim = 1, init = 'uniform', activation = 'sigmoid'))
+classifier.add(Dense(units = 1, kernel_initializer = 'uniform', activation = 'sigmoid'))
 
 # Compiling the ANN
 classifier.compile(optimizer = 'adam', loss = loss, metrics = [])
