@@ -17,8 +17,11 @@ de cout, faire varier alpha, taille des batchs et nombre d'époques).
 Ce qu'il faut faire:
 - tester d'autres architectures
 - implémenter un modèle plus basique (genre multilinéaire quoi)
-- faire de la feature selection sur les valeurs continues
-- trouver un moyen de gérer le fait qu'il y a très peu de valeurs labelxlées à 1
+- faire de la feature selection sur les valeurs continues (une facon de selectionner c'est de faire
+    une régression linéaire avec juste une feature et de voir quelles features ont le plus gros taux
+    de corrélation) (c'est la priorité la je pense)
+- trouver un moyen de gérer le fait qu'il y a très peu de valeurs labellées à 1 (normalement c'est géré
+    par l'argument 'weight_labels'
 - notamment il faudrait deja voir les resultats avec une simple régression linéaire
 
 
@@ -32,4 +35,11 @@ dans le bon ordre
 
 une analyse préliminaire des données:
 https://www.kaggle.com/headsortails/steering-wheel-of-fortune-porto-seguro-eda
+
+J'ai fait un algo random Forest mais c'est complètement nul en critère de Gini.
+Deja si on ajoute l'argument 'class_weight' on a un résultat un peu plus honnête.
+
+Conclusion du fichier random_prediciton.py: en fait ce fichier teste l'index de Gini si jamais on
+fait des prédictions random. En trouve qu'on peut monter jusqu'a 0.02 en Gini normalisé avec une
+distribution random.
 
