@@ -1,11 +1,11 @@
 feature_selection = "infogain"
 number_of_features = 10
 batch_size = 10000
-epochs = 3
-layers = [177, 10, 6, 3, 1]
-activation_functions = ["relu", "relu", "sigmoid"]
+epochs = 10
+layers = [177, 30, 10, 3, 1]
+activation_functions = ["relu", "relu", "relu", "sigmoid"]
 loss = "binary_crossentropy"
-alpha = 25
+alpha = 30
 
 parameters = {
     "feature_selection": {

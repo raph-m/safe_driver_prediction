@@ -19,7 +19,8 @@ Ce qu'il faut faire:
 - implémenter un modèle plus basique (genre multilinéaire quoi)
 - faire de la feature selection sur les valeurs continues (une facon de selectionner c'est de faire
     une régression linéaire avec juste une feature et de voir quelles features ont le plus gros taux
-    de corrélation) (c'est la priorité la je pense)
+    de corrélation) (c'est la priorité la je pense) c'est peut etre possible de faire de la feature
+    selection sur les données catégoriques et continues en même temps
 - trouver un moyen de gérer le fait qu'il y a très peu de valeurs labellées à 1 (normalement c'est géré
     par l'argument 'weight_labels'
 - notamment il faudrait deja voir les resultats avec une simple régression linéaire
