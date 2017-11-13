@@ -1,30 +1,49 @@
 import json
+import time
 
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from keras.models import Sequential
-from keras.layers import Dense
 from sklearn.metrics import confusion_matrix
 
-from util import cross_entropy, gini_normalized, gini
-from parameters import parameters, batch_size, epochs, layers, activation_functions, loss, alpha
-from feature_selection_1 import get_cached_features, continuous_values
+from util import cross_entropy, gini_normalized
+from feature_selection_1 import get_cached_features, continuous_values, categorical_features
 
-if loss == "cross_entropy":
-    loss = cross_entropy
+feature_selection = "infogain"
+number_of_features = 10
+loss = "reg:linear"
+alpha = 10
+# (alpha = 0.1 -> mean y_pred = 0.5 mais la prédiction est nulle)
+max_depth = 5
+
+parameters = {
+    "feature_selection": {
+        "name": feature_selection,
+        "number_of_features": number_of_features
+    },
+    "classifier": {
+        "name": "xgboost",
+        "loss":
+            {
+                "name": loss,
+                "alpha": alpha
+            },
+        "max_depth": max_depth
+    }
+}
 
 # Part 1 - Data Preprocessing
 # Importing the dataset
 dataset = pd.read_csv('train.csv')
 
 # feature selection
-categorical_features = get_cached_features(parameters["feature_selection"])
+if feature_selection == "infogain":
+    categorical_features = get_cached_features(parameters["feature_selection"])
+    continuous_values = []
 
 categorical_features_count = len(categorical_features)
-selected_features = categorical_features  # + continuous_values
+selected_features = categorical_features + continuous_values
+
 
 X = dataset.iloc[:, selected_features].values
 y = dataset.iloc[:, 1].values
@@ -32,6 +51,7 @@ y = dataset.iloc[:, 1].values
 column_ranges = []
 
 print("replacing missing values")
+t0 = time.time()
 for i in range(len(X[0, :])):
     if i <= categorical_features_count:
         # si c'est une variable de catégories, on prend comme stratégie de remplacer par la
@@ -48,24 +68,21 @@ for i in range(len(X[0, :])):
     for j in range(len(X[:, i])):
         if X[j, i] < -0.5:
             X[j, i] = replacement_value
-
+t1 = time.time()
+print(t1-t0)
 # Splitting the dataset into the Training set and Test set
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
-# Feature Scaling
-sc = StandardScaler()
-X_train = sc.fit_transform(X_train)
-X_test = sc.transform(X_test)
-
-# Part 2 - Now let's make the Classifier!
-# Fitting Random Forest Classification to the Training set
-from sklearn.ensemble import RandomForestClassifier
-class_weight = {0: 1., 1: alpha}
-classifier = RandomForestClassifier(n_estimators=10, criterion = 'gini', random_state = 0, max_features=1, class_weight=class_weight)
+print("training classifier")
+from xgboost import XGBClassifier
+classifier = XGBClassifier(max_depth=max_depth, scale_pos_weigth=alpha)
+t2 = time.time()
 classifier.fit(X_train, y_train)
+t3 = time.time()
+print(t3-t2)
 
 # Predicting the Test set results
-y_pred = classifier.predict(X_test)
+y_pred = classifier.predict_proba(X_test)[:, 1]
 
 print("gini normalized score: ")
 gini_score = gini_normalized(y_test, y_pred)
@@ -102,3 +119,5 @@ results = json.loads(results_txt)
 f = open("results.json", "w")
 f.write(json.dumps(results))
 f.close()
+
+

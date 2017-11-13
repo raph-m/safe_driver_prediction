@@ -28,6 +28,20 @@ import numpy as np
 y_test = np.loadtxt("y_test")
 y_pred = np.loadtxt("y_pred")
 
+print(y_pred)
+for i in y_pred:
+    if i > 0.001:
+        print(i)
+
+
+def to_csv(y_pred, ids):
+    import csv
+    with open('my_answer.csv', 'w') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=',')
+        spamwriter.writerow(['id', 'target'])
+        for i in range(len(y_pred)):
+            spamwriter.writerow([ids[i], y_pred[i]])
+
 
 def plot_accuracy(a, p):
     accuracies = []

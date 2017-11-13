@@ -44,3 +44,9 @@ Conclusion du fichier random_prediciton.py: en fait ce fichier teste l'index de 
 fait des prédictions random. En trouve qu'on peut monter jusqu'a 0.02 en Gini normalisé avec une
 distribution random.
 
+Maintenant je vais tenter XGBoost. Ici un petit lien qui explique comment fonctionnent les arbres de décisions
+de XGBoost:
+http://xgboost.readthedocs.io/en/latest/model.html
+Sinon je vous expliquerai comment ca marche c'est pas très compliqué.
+
+
