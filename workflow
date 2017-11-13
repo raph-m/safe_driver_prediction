@@ -49,4 +49,42 @@ de XGBoost:
 http://xgboost.readthedocs.io/en/latest/model.html
 Sinon je vous expliquerai comment ca marche c'est pas très compliqué.
 
+Résultats XGBoost: j'ai fait un commit avec la première fois que j'atteins un score honnete (0.22
+un truc comme ca). Ensuite j'obtiens un bon résultat (0.271) avec la loss par défaut et max_depth de 5,
+et pas de feature selection + un alpha qui vaut 10.
 
+
+Dans tools il y a maintenant moyen de faire un tracé de cap curve. Je vous laisse vous renseigner sur
+ce qu'est la cap curve, en tout cas il y a le tracé du pire prédicteur (random, c'est la ligne droite)
+et du meilleur (celui qui fait un angle). Donc plus l'aire entre le pire et notre modèle est bon et plus
+le prédicteur est bon !
+
+Normalement avec XGBoost on peut obtenir les résultats maximum. Donc pour trouver la valeur idéale des
+paramètres il faudrait regarder sur Kaggle.
+Ce que je constate pour l'instant c'est un sérieux overfitting (0.359 -> 0.271).
+Donc la on a un soucis, il faut checker combien d'estimateurs il y a dans ce truc. (apparemment 100)
+
+résultats de référence:
+train: 0.359
+test: 0.271
+avec: feature_selection = "none"
+number_of_features = 10
+loss = "reg:linear"
+alpha = 32
+max_depth = 5
+n_estimators = 100
+
+en fait si je passe à 200 estimators j'augmente l'overfitting ... bizarre
+(et je fais baisser le score de test)
+si je passe à 50 estimateurs je fais baisser l'overfitting mais aussi le score...
+Donc rester autour de 100 estimateurs parait bien.
+
+
+quelques notes sur comment gérer l'overfitting:
+http://xgboost.readthedocs.io/en/latest/how_to/param_tuning.html
+
+
+Si on change de modèle et qu'on passe en "rank:pairwise" on obtient des résultats similaires
+mais avec moins d'overfitting.
+
+Pour faire baisser l'overfitting le lien plus haut conseille de

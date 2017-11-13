@@ -1,20 +1,20 @@
 import json
 import time
 
+from xgboost import XGBClassifier
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix
 
-from util import cross_entropy, gini_normalized
+from util import gini_normalized
 from feature_selection_1 import get_cached_features, continuous_values, categorical_features
 
-feature_selection = "infogain"
+feature_selection = "none"
 number_of_features = 10
-loss = "reg:linear"
-alpha = 10
-# (alpha = 0.1 -> mean y_pred = 0.5 mais la prédiction est nulle)
+alpha = 32
 max_depth = 5
+n_estimators = 100
+loss = "default"
 
 parameters = {
     "feature_selection": {
@@ -28,7 +28,8 @@ parameters = {
                 "name": loss,
                 "alpha": alpha
             },
-        "max_depth": max_depth
+        "max_depth": max_depth,
+        "n_estimators": n_estimators
     }
 }
 
@@ -52,6 +53,7 @@ column_ranges = []
 
 print("replacing missing values")
 t0 = time.time()
+print("number of examples: "+str(len(X[:, 0])))
 for i in range(len(X[0, :])):
     if i <= categorical_features_count:
         # si c'est une variable de catégories, on prend comme stratégie de remplacer par la
@@ -74,8 +76,7 @@ print(t1-t0)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
 print("training classifier")
-from xgboost import XGBClassifier
-classifier = XGBClassifier(max_depth=max_depth, scale_pos_weigth=alpha)
+classifier = XGBClassifier(subsample=0.6, n_estimators=n_estimators, max_depth=max_depth, scale_pos_weigth=alpha)
 t2 = time.time()
 classifier.fit(X_train, y_train)
 t3 = time.time()
@@ -83,8 +84,13 @@ print(t3-t2)
 
 # Predicting the Test set results
 y_pred = classifier.predict_proba(X_test)[:, 1]
+y_pred_train = classifier.predict_proba(X_train)[:, 1]
 
-print("gini normalized score: ")
+print("gini normalized score (train): ")
+gini_score = gini_normalized(y_train, y_pred_train)
+print(gini_score)
+
+print("gini normalized score (test): ")
 gini_score = gini_normalized(y_test, y_pred)
 print(gini_score)
 
@@ -92,21 +98,15 @@ import numpy as np
 np.savetxt("y_test", y_test)
 np.savetxt("y_pred", y_pred)
 
+np.savetxt("y_train", y_test)
+np.savetxt("y_pred_train", y_pred)
+
 print("mean de y pred")
 print(np.mean(y_pred))
 y_pred = (y_pred > 0.5)
 
-# Making the Confusion Matrix
-cm = confusion_matrix(y_test, y_pred)
-print("confusion matrix")
-print(cm)
-
 parameters.update({
     "result": {
-        "tp": int(cm[0, 0]),
-        "tn": int(cm[1, 1]),
-        "fp": int(cm[1, 0]),
-        "fn": int(cm[0, 1]),
         "gini_score": gini_score
 }})
 

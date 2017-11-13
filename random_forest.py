@@ -9,12 +9,10 @@ from keras.models import Sequential
 from keras.layers import Dense
 from sklearn.metrics import confusion_matrix
 
-from util import cross_entropy, gini_normalized, gini
+from util import gini_normalized, gini
 from parameters import parameters, batch_size, epochs, layers, activation_functions, loss, alpha
 from feature_selection_1 import get_cached_features, continuous_values
 
-if loss == "cross_entropy":
-    loss = cross_entropy
 
 # Part 1 - Data Preprocessing
 # Importing the dataset

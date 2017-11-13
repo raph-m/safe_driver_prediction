@@ -1,10 +1,9 @@
-import tensorflow as tf
 import numpy as np
 from parameters import alpha
 
 
-def cross_entropy(actual, pred):
-    return tf.reduce_mean(-tf.log(pred) * actual * alpha - tf.log(1-pred) * (1 - actual))
+# def cross_entropy(actual, pred):
+#     return tf.reduce_mean(-tf.log(pred) * actual * alpha - tf.log(1-pred) * (1 - actual))
 
 
 def gini(actual, pred, cmpcol=0, sortcol=1):

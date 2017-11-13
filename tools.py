@@ -27,11 +27,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 y_test = np.loadtxt("y_test")
 y_pred = np.loadtxt("y_pred")
-
-print(y_pred)
-for i in y_pred:
-    if i > 0.001:
-        print(i)
+y_train = np.loadtxt("y_train")
+y_pred_train = np.loadtxt("y_pred_train")
 
 
 def to_csv(y_pred, ids):
@@ -49,9 +46,33 @@ def plot_accuracy(a, p):
 
         pred = p > float(i)/100
 
-        accuracies.append(np.mean(pred == (a>0.5)))
+        accuracies.append(np.mean(pred == (a> 0.5)))
     plt.plot(range(1, 100), accuracies)
     print(accuracies)
     plt.show()
 
-plot_accuracy(y_test, y_pred)
+
+def plot_cap_curve(a, p):
+
+    number_of_pos = int(np.sum(a))
+    index = np.argsort(p)[::-1]
+
+    capteurs = [(a[index[i]] > 0.5) for i in range(len(index))]
+    capteurs = 100*np.cumsum(capteurs)/len(p)
+
+    crystal_ball = np.zeros(len(p))
+    crystal_ball[:number_of_pos] = np.ones(number_of_pos)
+    crystal_ball = 100*np.cumsum(crystal_ball)/len(p)
+
+    random = np.ones(len(p))
+    random = 100*np.cumsum(random)*number_of_pos/(len(p)**2)
+
+    t = np.linspace(0, 100, len(p))
+    plt.plot(t, capteurs)
+    plt.plot(t, random)
+    plt.plot(t, crystal_ball)
+
+    plt.show()
+
+plot_cap_curve(y_test, y_pred)
+plot_cap_curve(y_train, y_pred_train)
