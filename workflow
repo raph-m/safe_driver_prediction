@@ -87,4 +87,7 @@ http://xgboost.readthedocs.io/en/latest/how_to/param_tuning.html
 Si on change de modèle et qu'on passe en "rank:pairwise" on obtient des résultats similaires
 mais avec moins d'overfitting.
 
-Pour faire baisser l'overfitting le lien plus haut conseille de
+Pour faire baisser l'overfitting le lien plus haut conseille de mettre le subsampling à une valeur
+inférieure à 1. Apparemment ca augmente diminue le nombre de données prises en compte ?? wtf je vois
+pas le rapport. Bref ca augmente légèrement les resultats de train et de test. Enfin bref je suis
+sceptique par rapport à ce truc.
