@@ -88,6 +88,36 @@ Si on change de modèle et qu'on passe en "rank:pairwise" on obtient des résult
 mais avec moins d'overfitting.
 
 Pour faire baisser l'overfitting le lien plus haut conseille de mettre le subsampling à une valeur
-inférieure à 1. Apparemment ca augmente diminue le nombre de données prises en compte ?? wtf je vois
+inférieure à 1. Apparemment ca diminue le nombre de données prises en compte ?? wtf je vois
 pas le rapport. Bref ca augmente légèrement les resultats de train et de test. Enfin bref je suis
 sceptique par rapport à ce truc.
+
+
+un kernel Kaggle intéressant:
+https://www.kaggle.com/tendolkar3/no-magic-0-283-lb-detailed-w-data-exploration/notebook
+ce mec donne des paramètres qui marchent bien pour un XGBoost
+il donne aussi une méthode intéressante:
+faire trois arbres LightGBM assez différents et les faire voter.
+
+un lien sur LightGBM:
+https://www.analyticsvidhya.com/blog/2017/06/which-algorithm-takes-the-crown-light-gbm-vs-xgboost/
+
+j'ai essayé de faire du OnehotEncoding sur XGBoost mais ca pose un problème de mémoire je pense
+ca me met cette erreur:
+>>>
+terminate called after throwing an instance of 'std::bad_alloc'
+  what():  std::bad_alloc
+
+Process finished with exit code 134 (interrupted by signal 6: SIGABRT)
+>>>
+
+
+j'ai réussi à faire tourner un modèle LightGBM qui donne un résultat assez satisfaisant (0.25)
+sans que j'ai touché aux paramètres. Ca a l'air d'être une bonne piste (notamment de combiner
+différents arbres);
+
+
+
+
+
+

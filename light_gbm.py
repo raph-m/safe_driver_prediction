@@ -1,11 +1,10 @@
 import json
 import time
 
-from xgboost import XGBClassifier
+import lightgbm as lgb
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder
 
 from util import gini_normalized
 from feature_selection_1 import get_cached_features, continuous_values, categorical_features
@@ -75,30 +74,49 @@ for i in range(len(X[0, :])):
     for j in range(len(X[:, i])):
         if X[j, i] < -0.5:
             X[j, i] = replacement_value
-
 t1 = time.time()
 print(t1-t0)
 # Splitting the dataset into the Training set and Test set
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
-print("training classifier")
-classifier = XGBClassifier(
-    subsample=subsample,
-    max_depth=max_depth,
-    scale_pos_weigth=alpha,
-    objective=loss,
-    gamma=gamma,
-    colsample_bytree=colsample_bytree,
-    learning_rate=learning_rate
-)
+
+# create dataset for lightgbm
+lgb_train = lgb.Dataset(X_train, y_train)
+lgb_eval = lgb.Dataset(X_test, y_test, reference=lgb_train)
+
+# specify your configurations as a dict
+params = {
+    'task': 'train',
+    'boosting_type': 'gbdt',
+    'objective': 'regression',
+    'metric': {'l2', 'auc'},
+    'num_leaves': 31,
+    'learning_rate': 0.05,
+    'feature_fraction': 0.9,
+    'bagging_fraction': 0.8,
+    'bagging_freq': 5,
+    'verbose': 0
+}
+
+print('Start training...')
+# train
 t2 = time.time()
-classifier.fit(X_train, y_train)
+gbm = lgb.train(params,
+                lgb_train,
+                num_boost_round=20,
+                valid_sets=lgb_eval,
+                early_stopping_rounds=5)
 t3 = time.time()
 print(t3-t2)
 
-# Predicting the Test set results
-y_pred = classifier.predict_proba(X_test)[:, 1]
-y_pred_train = classifier.predict_proba(X_train)[:, 1]
+print('Save model...')
+# save model to file
+gbm.save_model('model.txt')
+
+print('Start predicting...')
+# predict
+y_pred = gbm.predict(X_test, num_iteration=gbm.best_iteration)
+y_pred_train = gbm.predict(X_train, num_iteration=gbm.best_iteration)
 
 print("gini normalized score (train): ")
 gini_score = gini_normalized(y_train, y_pred_train)
@@ -117,7 +135,6 @@ np.savetxt("y_pred_train", y_pred)
 
 print("mean de y pred")
 print(np.mean(y_pred))
-y_pred = (y_pred > 0.5)
 
 parameters.update({
     "result": {
