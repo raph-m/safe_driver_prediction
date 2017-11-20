@@ -26,7 +26,7 @@ parameters = {
         "number_of_features": number_of_features
     },
     "classifier": {
-        "name": "xgboost",
+        "name": "lightgbm",
         "loss":
             {
                 "name": loss,
@@ -37,14 +37,10 @@ parameters = {
     }
 }
 
+
 # Part 1 - Data Preprocessing
 # Importing the dataset
 dataset = pd.read_csv('train.csv')
-
-# feature selection
-if feature_selection == "infogain":
-    categorical_features = get_cached_features(parameters["feature_selection"])
-    continuous_values = []
 
 categorical_features_count = len(categorical_features)
 selected_features = categorical_features + continuous_values
@@ -91,21 +87,65 @@ params = {
     'objective': 'regression',
     'metric': {'l2', 'auc'},
     'num_leaves': 31,
+    'max_depth': 6,
     'learning_rate': 0.05,
     'feature_fraction': 0.9,
-    'bagging_fraction': 0.8,
+    'bagging_fraction': 0.9,
     'bagging_freq': 5,
     'verbose': 0
 }
 
+params_1 = {
+    'task': 'train',
+    'boosting_type': 'gbdt',
+    'objective': 'binary',
+    'metric': 'auc',
+    'max_depth': 3,
+    'learning_rate': 0.05,
+    'feature_fraction': 1,
+    'bagging_fraction': 1,
+    'bagging_freq': 10,
+    'verbose': 0
+}
+params_2 = {
+    'task': 'train',
+    'boosting_type': 'gbdt',
+    'objective': 'binary',
+    'metric': 'auc',
+    'max_depth': 4,
+    'learning_rate': 0.05,
+    'feature_fraction': 0.9,
+    'bagging_fraction': 0.9,
+    'bagging_freq': 2,
+    'verbose': 0
+}
+params_3 = {
+    'task': 'train',
+    'boosting_type': 'gbdt',
+    'objective': 'binary',
+    'metric': 'auc',
+    'max_depth': 5,
+    'learning_rate': 0.05,
+    'feature_fraction': 0.3,
+    'bagging_fraction': 0.7,
+    'bagging_freq': 10,
+    'verbose': 0
+}
+
+
 print('Start training...')
 # train
 t2 = time.time()
-gbm = lgb.train(params,
-                lgb_train,
-                num_boost_round=20,
-                valid_sets=lgb_eval,
-                early_stopping_rounds=5)
+
+gbm = lgb.train(
+    params_2,
+    lgb_train,
+    num_boost_round=1000,
+    valid_sets=lgb_eval,
+    early_stopping_rounds=100,
+    verbose_eval=50
+)
+
 t3 = time.time()
 print(t3-t2)
 
@@ -151,4 +191,50 @@ f = open("results.json", "w")
 f.write(json.dumps(results))
 f.close()
 
+
+def make_submission():
+    submission_dataset = pd.read_csv('test.csv')
+    X_submission = submission_dataset.iloc[:, [i-1 for i in selected_features]].values
+    ids = submission_dataset.iloc[:, 0].values
+
+    print("replacing missing values")
+    print("number of examples in test: "+str(len(X_submission[:, 0])))
+    for i in range(len(X[0, :])):
+        if i <= categorical_features_count:
+            # si c'est une variable de catégories, on prend comme stratégie de remplacer par la
+            # valeur la plus fréquente
+            (values, counts) = np.unique(X[:, i], return_counts=True)
+            counts = [counts[i] if values[i] >= 0 else 0 for i in range(len(values))]
+            ind = np.argmax(counts)
+            column_ranges.append(max(values))
+            replacement_value = values[ind]
+        else:
+            # sinon on prend simplement la moyenne
+            replacement_value = np.mean(X[:, i])
+
+        for j in range(len(X_submission[:, i])):
+            if X_submission[j, i] < -0.5:
+                X_submission[j, i] = replacement_value
+
+    y_submission = gbm.predict(X_submission, num_iteration=gbm.best_iteration)
+
+    from tools import to_csv
+
+    minimum = 1
+    maximum = 0
+    epsilon = 0.01
+
+    for y_i in y_submission:
+        if y_i < minimum:
+            minimum = y_i
+        if y_i > maximum:
+            maximum = y_i
+
+    y_submission = y_submission - minimum + epsilon
+    y_submission = y_submission/(maximum - minimum)
+    y_submission = y_submission/2
+
+    to_csv(y_submission, ids)
+
+make_submission()
 

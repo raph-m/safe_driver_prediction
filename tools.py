@@ -74,5 +74,3 @@ def plot_cap_curve(a, p):
 
     plt.show()
 
-plot_cap_curve(y_test, y_pred)
-plot_cap_curve(y_train, y_pred_train)

@@ -1,0 +1,22 @@
+un lien sympa:
+https://medium.com/@pushkarmandot/https-medium-com-pushkarmandot-what-is-lightgbm-how-to-implement-it-how-to-fine-tune-the-parameters-60347819b7fc
+notamment il explique bien les paramètres.
+
+Un premier résultat (cf commit "premier resultat 3 arbres Lightgbm")
+
+Gini eval number 1:
+0.164022666505
+Gini eval number 2:
+0.192626564433
+Gini eval number 3:
+0.190952872873
+Gini eval mean on all trees:
+0.223210363068
+Gini train number 1:
+0.168199608557
+Gini train number 2:
+0.200981653514
+Gini train number 3:
+0.191656091686
+Gini train mean on all trees:
+0.230066666097

@@ -99,8 +99,6 @@ ENV/
 
 # mypy
 .mypy_cache/
-/test.csv
-/train.csv
 .idea/inspectionProfiles/
 .idea/misc.xml
 .idea/modules.xml
@@ -110,9 +108,10 @@ course_project.pdf
 notes
 .idea/vcs.xml
 
-/train_small.csv
 /y_pred
 /y_test
 /tryouts.ipynb
 /y_pred_train
 /y_train
+/model.txt
+*.csv
