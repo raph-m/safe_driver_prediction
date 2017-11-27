@@ -1,0 +1,27 @@
+NN:
+
+Activation Function:
+relu --> 0.221167208439
+softmax --> 0.235171840116
+elu --> 0.237538324464
+selu --> 0.233232342987
+hard_sigmoid --> 0.221843790464
+
+Loss (avec elu en activation function):
+binary_crossentropy --> 0.237538324464
+mean_squared_error --> 0.236599491188
+mean_absolute_error --> 0.233500186527
+mean_absolute_percentage_error --> 0.00604527224228
+hinge --> 0.176446026977
+poisson --> 0.236419749447
+
+Architecture (avec elu et binary_crossentropy):
+layers = [177, 30, 10, 3, 1] --> 0.237538324464
+layers = [177, 400, 200, 300, 100, 1] --> 0.237093246211
+layers = [177, 400, 100, 1] --> 0.237922312119
+layers = [177, 100, 100, 1] --> 0.239480110267
+layers = [177, 10, 100, 1] --> 0.238057974655
+layers = [177, 200, 100, 1] --> 0.239422056406
+layers = [177, 200, 200, 1] --> 0.237197182719
+layers = [177, 200, 1] --> 0.236497289382
+layers = [177, 400, 1] --> 0.235519427348
