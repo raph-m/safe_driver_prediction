@@ -1,29 +1,25 @@
 import json
 import time
 
-from xgboost import XGBClassifier
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
+from sklearn import svm
 
 from util import gini_normalized
 from feature_selection_1 import get_cached_features, continuous_values, categorical_features
 
 feature_selection = "none"
 number_of_features = 10
-alpha = 1.6
-max_depth = 6
 n_estimators = 100
-loss = 'binary:logistic'#"rank:pairwise"
-subsample = 0.8
-learning_rate = 0.09
-min_child_weight=0.77
-colsample_bytree = 0.75
-gamma = 10
-reg_alpha=8
-reg_lambda=1.3
-eval_metric='auc'
+#SVC parameters
+C=1.0
+kernel = 'rbf' #or 'linear', 'poly', 'sigmoid', 'precomputed', custom (callable)
+degree = 3 #only if kernel = 'poly'
+gamma='auto' #rbf, poly or sigmoid, default 1/n_features
+class_weight = {1:3, 0:1} #weight of given labels
+cach_size=1000
 
 parameters = {
     "feature_selection": {
@@ -31,13 +27,13 @@ parameters = {
         "number_of_features": number_of_features
     },
     "classifier": {
-        "name": "xgboost",
-        "loss":
+        "name": "SVM",
+        "kernel":
             {
-                "name": loss,
-                "alpha": alpha
+                "name": kernel,
+                "degree": degree,
+                "gamma":gamma
             },
-        "max_depth": max_depth,
         "n_estimators": n_estimators
     }
 }
@@ -83,22 +79,18 @@ for i in range(len(X[0, :])):
 t1 = time.time()
 print(t1-t0)
 # Splitting the dataset into the Training set and Test set
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=200)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
 print("training classifier")
-classifier = XGBClassifier(
-    subsample=subsample,
-    max_depth=max_depth,
-    scale_pos_weight=alpha,
-    objective=loss,
+classifier = svm.SVC(
+    C=C,
+    kernel=kernel,
+    degree=degree,
     gamma=gamma,
-    colsample_bytree=colsample_bytree,
-    learning_rate=learning_rate,
-    min_child_weight=min_child_weight,
-    reg_alpha=reg_alpha,
-    reg_lambda=reg_lambda
-    #eval_metric=eval_metric
-)
+    class_weight=class_weight,
+    cach_size=cach_size
+    )
+
 t2 = time.time()
 classifier.fit(X_train, y_train)
 t3 = time.time()
