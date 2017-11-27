@@ -112,6 +112,11 @@ notes
 /y_test
 /tryouts.ipynb
 /y_train
+/y_pred_train
+/y_test_pred
 /model.txt
 /*.csv
+clf_1.txt
+clf_2.txt
+clf_3.txt
 

@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 
-num_boost_round = 10
+num_boost_round = 300
 
 train_master = pd.read_csv('train.csv')
 test_master = pd.read_csv('test.csv')
@@ -77,7 +77,7 @@ X_test = test.iloc[:, 1:].values
 params_1 = {
     'task': 'train',
     'boosting_type': 'gbdt',
-    'objective': 'binary',
+    'objective': 'regression',
     'metric': 'auc',
     'max_depth': 3,
     'learning_rate': 0.05,
@@ -90,7 +90,7 @@ params_1 = {
 params_2 = {
     'task': 'train',
     'boosting_type': 'gbdt',
-    'objective': 'binary',
+    'objective': 'regression',
     'metric': 'auc',
     'max_depth': 4,
     'learning_rate': 0.05,
@@ -103,7 +103,7 @@ params_2 = {
 params_3 = {
     'task': 'train',
     'boosting_type': 'gbdt',
-    'objective': 'binary',
+    'objective': 'regression',
     'metric': 'auc',
     'max_depth': 5,
     'learning_rate': 0.05,
@@ -166,4 +166,17 @@ y_test_pred = (clf_1.predict(X_test, raw_score=True) +
                clf_2.predict(X_test, raw_score=True) +
                clf_3.predict(X_test, raw_score=True)
                ) / 3
+
+clf_1.save_model('clf_1.txt')
+clf_1.save_model('clf_2.txt')
+clf_1.save_model('clf_3.txt')
+
+print(y_test_pred)
+np.savetxt("y_test_pred", y_test_pred)
+
+ids = test.iloc[:, 0].values
+
+from tools import to_csv
+
+to_csv(y_test_pred, ids)
 
