@@ -1,0 +1,36 @@
+un lien sympa:
+https://medium.com/@pushkarmandot/https-medium-com-pushkarmandot-what-is-lightgbm-how-to-implement-it-how-to-fine-tune-the-parameters-60347819b7fc
+notamment il explique bien les paramètres.
+
+Un premier résultat (cf commit "premier resultat 3 arbres Lightgbm") dans light_gmb_3.py
+
+On a classifier lgbm différents et un num_boost_rounds = 1000, on obtient:
+Gini eval number 1:
+0.279438667323
+Gini eval number 2:
+0.282311914932
+Gini eval number 3:
+0.279672633643
+Gini eval mean on all trees:
+0.282670181293
+Gini train number 1:
+0.326026673549
+Gini train number 2:
+0.339955093735
+Gini train number 3:
+0.373440646129
+Gini train mean on all trees:
+0.350058668863
+
+le kernel dont je me suis inspiré:
+https://www.kaggle.com/tendolkar3/no-magic-0-283-lb-detailed-w-data-exploration
+
+Le meilleur résultat public est le suivant:
+https://www.kaggle.com/raphboss/lb-0-287-porto-seguro-mix/edit
+
+
+avec un seul arbre:
+Gini eval mean on all trees:
+0.277289505867
+Gini train mean on all trees:
+0.309724464884

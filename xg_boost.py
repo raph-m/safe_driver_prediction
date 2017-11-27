@@ -85,7 +85,7 @@ print("training classifier")
 classifier = XGBClassifier(
     subsample=subsample,
     max_depth=max_depth,
-    scale_pos_weigth=alpha,
+    scale_pos_weight=alpha,
     objective=loss,
     gamma=gamma,
     colsample_bytree=colsample_bytree,
