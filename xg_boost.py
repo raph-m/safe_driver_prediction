@@ -5,10 +5,10 @@ from xgboost import XGBClassifier
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder
 
 from util import gini_normalized
 from feature_selection_1 import get_cached_features, continuous_values, categorical_features
+cat_feat = [3, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33]
 
 feature_selection = "none"
 number_of_features = 10
@@ -60,7 +60,7 @@ y = dataset.iloc[:, 1].values
 
 column_ranges = []
 
-print("replacing missing values")
+print("replacing missing values and encode categorical features")
 t0 = time.time()
 print("number of examples: "+str(len(X[:, 0])))
 for i in range(len(X[0, :])):
@@ -83,7 +83,7 @@ for i in range(len(X[0, :])):
 t1 = time.time()
 print(t1-t0)
 # Splitting the dataset into the Training set and Test set
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=200)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
 print("training classifier")
 classifier = XGBClassifier(

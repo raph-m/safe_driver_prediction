@@ -14,12 +14,12 @@ feature_selection = "none"
 number_of_features = 10
 n_estimators = 100
 #SVC parameters
-C=1.0
-kernel = 'rbf' #or 'linear', 'poly', 'sigmoid', 'precomputed', custom (callable)
+C=2.0
+kernel = 'poly' #or 'linear', 'poly', 'sigmoid', 'precomputed', custom (callable)
 degree = 3 #only if kernel = 'poly'
 gamma='auto' #rbf, poly or sigmoid, default 1/n_features
 class_weight = {1:3, 0:1} #weight of given labels
-cach_size=1000
+cache_size=1000
 
 parameters = {
     "feature_selection": {
@@ -79,7 +79,7 @@ for i in range(len(X[0, :])):
 t1 = time.time()
 print(t1-t0)
 # Splitting the dataset into the Training set and Test set
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.05, test_size=0.05, random_state=10)
 
 print("training classifier")
 classifier = svm.SVC(
@@ -87,8 +87,9 @@ classifier = svm.SVC(
     kernel=kernel,
     degree=degree,
     gamma=gamma,
-    class_weight=class_weight,
-    cach_size=cach_size
+#    class_weight=class_weight,
+    cache_size=cache_size,
+    probability=True
     )
 
 t2 = time.time()
