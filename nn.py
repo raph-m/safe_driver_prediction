@@ -19,11 +19,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from keras.models import Sequential
 from keras import regularizers
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from sklearn.metrics import confusion_matrix
 
 from util import gini_normalized
-from parameters import parameters, batch_size, epochs, layers, activation_functions, loss, alpha
+from parameters import parameters, batch_size, epochs, layers, activation_functions, loss, alpha, dropout
 from feature_selection_1 import get_cached_features, continuous_values
 
 
@@ -104,9 +104,10 @@ classifier.add(Dense(units = layers[1], kernel_initializer = 'uniform', kernel_r
 # no need to specify input-size since it is the output size of the previous layer
 for i in range(len(layers)-3):
     classifier.add(Dense(units=layers[i+2], kernel_initializer = 'uniform', kernel_regularizer= regularizers.l2(0.01), activation = activation_functions[i+1]))
+    classifier.add(Dropout(dropout[i]))
 
 # Adding the output layer
-classifier.add(Dense(units = 1, kernel_initializer = 'uniform', kernel_regularizer=regularizers.l2(0.01), activation = 'sigmoid'))
+classifier.add(Dense(units = 1, kernel_initializer = 'uniform', activation = 'sigmoid'))
 
 # Compiling the ANN
 classifier.compile(optimizer = 'adam', loss = loss, metrics = [])
@@ -131,21 +132,7 @@ np.savetxt("y_pred", y_pred)
 
 print("mean de y pred")
 print(np.mean(y_pred))
-y_pred = (y_pred > 0.5)
 
-# Making the Confusion Matrix
-cm = confusion_matrix(y_test, y_pred)
-print("confusion matrix")
-print(cm)
-
-parameters.update({
-    "result": {
-        "tp": int(cm[0, 0]),
-        "tn": int(cm[1, 1]),
-        "fp": int(cm[1, 0]),
-        "fn": int(cm[0, 1]),
-        "gini_score": gini_score
-}})
 
 f = open("results.json", "r")
 results_txt = f.read()
