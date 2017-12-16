@@ -1,9 +1,10 @@
 import numpy as np
+import tensorflow as tf
 from parameters import alpha
 
 
-# def cross_entropy(actual, pred):
-#     return tf.reduce_mean(-tf.log(pred) * actual * alpha - tf.log(1-pred) * (1 - actual))
+def cross_entropy(actual, pred):
+    return tf.reduce_mean(-tf.log(pred) * actual * alpha - tf.log(1 - pred) * (1 - actual))
 
 
 def gini(actual, pred, cmpcol=0, sortcol=1):
@@ -19,3 +20,9 @@ def gini(actual, pred, cmpcol=0, sortcol=1):
 
 def gini_normalized(a, p):
     return gini(a, p) / gini(a, a)
+
+
+def gini_xgb(preds, dtrain):
+    labels = dtrain.get_label()
+    gini_score = gini_normalized(labels, preds)
+    return [('gini', gini_score)]
