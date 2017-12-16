@@ -5,8 +5,13 @@ from collections import Counter
 from proj2.tools import change_datatype, change_datatype_float
 
 path_to_data = "/media/raph/Elements/ml1/churn/"
-transactions_chunk_size = 300000
+transactions_chunk_size = 30000
 todo = "train"
+
+if todo =="train":
+    max_date = datetime.strptime("20170201", "%Y%m%d").date()
+else:
+    max_date = datetime.strptime("20170301", "%Y%m%d").date()
 
 train = pd.read_csv(path_to_data + todo+"_v2.csv")
 train = pd.concat((train, pd.read_csv(path_to_data + todo+".csv")), axis=0,
@@ -44,7 +49,7 @@ def reformat_transactions(df):
     df['membership_expire_date'] = df.membership_expire_date.apply(
         lambda x: datetime.strptime(str(int(x)), "%Y%m%d").date() if pd.notnull(x) else "NAN")
     df['payment_method_id'] = df.payment_method_id.apply(lambda x: int(x) if pd.notnull(x) else -1)
-    boolean_indexes = df["transaction_date"] < datetime.strptime("20170201", "%Y%m%d").date()
+    boolean_indexes = df["transaction_date"] < max_date
     indexes_to_drop = [e[0] if e[1] else None for e in boolean_indexes.iteritems()]
     indexes_to_keep = set(range(df.shape[0])) - set(indexes_to_drop)
     df = df.take(list(indexes_to_keep))
