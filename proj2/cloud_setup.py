@@ -25,7 +25,7 @@ sudo apt-get install unzip
 unzip data.zip
 cd safe_driver_prediction
 git pull origin master
-python proj2/feature_engineering.py train ../../data/ 3000000
+python proj2/feature_engineering.py train ../../churn/ 3000000
 """
 
 bashCommand = "cwm --rdf test.rdf --ntriples > test.nt"

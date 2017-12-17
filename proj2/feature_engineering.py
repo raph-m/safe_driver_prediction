@@ -166,7 +166,7 @@ if __name__ == "__main__":
         todo = sys.argv[1]
         path_to_data = sys.argv[2]
         transactions_chunk_size = sys.argv[3]
-        make_csv(todo=todo, path_to_data=path_to_data, transactions_chunk_size=transactions_chunk_size)
+        make_csv(todo=todo, path_to_data=path_to_data, transactions_chunk_size=int(transactions_chunk_size))
     else:
         print("error: more than 3 arguments")
 
