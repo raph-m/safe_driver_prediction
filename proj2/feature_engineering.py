@@ -4,9 +4,10 @@ from collections import Counter
 from datetime import timedelta
 from tools import change_datatype, change_datatype_float, memory_usage
 import time
+from config import path_to_data, default_transactions_chunk_size
 
 
-def make_csv(todo="train", path_to_data="/media/raph/Elements/ml1/churn/", transactions_chunk_size=30000):
+def make_csv(todo="train", path_to_data=path_to_data, transactions_chunk_size=default_transactions_chunk_size):
 
     if todo == "train":
         max_date = datetime.strptime("20170201", "%Y%m%d").date()
@@ -42,7 +43,6 @@ def make_csv(todo="train", path_to_data="/media/raph/Elements/ml1/churn/", trans
     change_datatype(training)
     change_datatype_float(training)
 
-
     def reformat_transactions(df):
         df['transaction_date'] = df.transaction_date.apply(
             lambda x: datetime.strptime(str(int(x)), "%Y%m%d").date() if pd.notnull(x) else "NAN")
@@ -55,85 +55,104 @@ def make_csv(todo="train", path_to_data="/media/raph/Elements/ml1/churn/", trans
         df = df.take(list(indexes_to_keep))
         return df
 
+    def iterate_on_transactions(training=training, version=1):
+
+        if version == 1:
+            print("iterate on transactions")
+            path_to_csv = path_to_data + 'transactions.csv'
+        else:
+            print("iterate on transactions_v2")
+            path_to_csv = path_to_data + 'transactions_v2.csv'
+
+        i = 0
+        df_iter = pd.read_csv(path_to_csv, low_memory=False, iterator=True,
+                              chunksize=transactions_chunk_size)
+        print("starting iteration...")
+        for transactions in df_iter:
+            print("i=" + str(i))
+            transactions = reformat_transactions(transactions)
+            user_count = Counter(transactions['msno']).most_common()
+            user_count = pd.DataFrame(user_count)
+            user_count.columns = ['msno', 'current_number_of_transactions']
+            user_count.set_index('msno', inplace=True)
+            training = pd.merge(left=training, right=user_count, how='left', left_index=True, right_index=True)
+            training['current_number_of_transactions'] = training.current_number_of_transactions.apply(
+                lambda x: int(x) if pd.notnull(x) else 0)
+            training["total_number_of_transactions"] += training["current_number_of_transactions"]
+            training.drop(['current_number_of_transactions'], axis=1, inplace=True)
+
+            print("memory usage of training: ")
+            print(memory_usage(training))
+            print("memory usage of transactions: ")
+            print(memory_usage(transactions))
+            i += 1
+
+            if i > 0:
+                break
+
+        print("end of iteration...")
+
+        i = 0
+        training.reset_index(inplace=True)
+        training_copy = training.copy()
+
+        df_iter = pd.read_csv(path_to_data + 'transactions.csv', low_memory=False, iterator=True,
+                              chunksize=transactions_chunk_size)
+        print("starting iteration, looking for most recent transaction...")
+        for transactions in df_iter:
+            print("i=" + str(i))
+
+            reformat_transactions(transactions)
+            recent_transactions = transactions.sort_values(['transaction_date']).groupby('msno').first()
+            recent_transactions.reset_index(inplace=True)
+            temp_training = pd.merge(left=training_copy, right=recent_transactions, how='right', on=['msno'], right_index=True)
+            training = pd.concat((training, temp_training))
+            training = training.sort_values(['transaction_date']).groupby('msno').first()
+
+            print("memory usage of training: ")
+            print(memory_usage(training))
+            print("memory usage of transactions: ")
+            print(memory_usage(transactions))
+
+            i += 1
+            if i > 0:
+                break
+
+        del training_copy
+
+        i = 0
+
+        df_iter = pd.read_csv(path_to_data + 'transactions.csv', low_memory=False, iterator=True,
+                              chunksize=transactions_chunk_size)
+
+        training["price_per_day"] = training["actual_amount_paid"]/(training["payment_plan_days"]+0.01)
+
+        print("starting iteration, looking for usual price per day...")
+        for transactions in df_iter:
+            print("i=" + str(i))
+            i += 1
+
+            transactions = reformat_transactions(transactions)
+            transactions["current_price_per_day"] = transactions["actual_amount_paid"] / (transactions["payment_plan_days"] + 0.01)
+            transactions = transactions.groupby("msno").sum()
+            columns_to_keep = ["current_price_per_day"]
+            transactions = transactions[columns_to_keep]
+
+            training = pd.merge(left=training, right=transactions, how='left', left_index=True, right_index=True)
+
+            training["usual_price_per_day"] += training["current_price_per_day"]
+            training.drop(['current_price_per_day'], axis=1, inplace=True)
+
+            if i > 0:
+                break
+
+        return training
+
     training["total_number_of_transactions"] = 0
-
-    training["current_number_of_transactions"] = 0
-    training.drop(['current_number_of_transactions'], axis=1, inplace=True)
-
-
-    i = 0
-    df_iter = pd.read_csv(path_to_data + 'transactions.csv', low_memory=False, iterator=True,
-                          chunksize=transactions_chunk_size)
-    print("starting iteration...")
-    for transactions in df_iter:
-        print("i=" + str(i))
-        transactions = reformat_transactions(transactions)
-        user_count = Counter(transactions['msno']).most_common()
-        user_count = pd.DataFrame(user_count)
-        user_count.columns = ['msno', 'current_number_of_transactions']
-        user_count.set_index('msno', inplace=True)
-        training = pd.merge(left=training, right=user_count, how='left', left_index=True, right_index=True)
-        training['current_number_of_transactions'] = training.current_number_of_transactions.apply(
-            lambda x: int(x) if pd.notnull(x) else 0)
-        training["total_number_of_transactions"] += training["current_number_of_transactions"]
-        training.drop(['current_number_of_transactions'], axis=1, inplace=True)
-
-        print("memory usage of training: ")
-        print(memory_usage(training))
-        print("memory usage of transactions: ")
-        print(memory_usage(transactions))
-        i += 1
-    print("end of iteration...")
-
-
-    i = 0
-    training.reset_index(inplace=True)
-    training_copy = training.copy()
-
-    df_iter = pd.read_csv(path_to_data + 'transactions.csv', low_memory=False, iterator=True,
-                          chunksize=transactions_chunk_size)
-    print("starting iteration, looking for most recent transaction...")
-    for transactions in df_iter:
-        print("i=" + str(i))
-
-        reformat_transactions(transactions)
-        recent_transactions = transactions.sort_values(['transaction_date']).groupby('msno').first()
-        recent_transactions.reset_index(inplace=True)
-        temp_training = pd.merge(left=training_copy, right=recent_transactions, how='right', on=['msno'], right_index=True)
-        training = pd.concat((training, temp_training))
-        training = training.sort_values(['transaction_date']).groupby('msno').first()
-
-        i += 1
-
-    del training_copy
-
-
-    i = 0
-
-    df_iter = pd.read_csv(path_to_data + 'transactions.csv', low_memory=False, iterator=True,
-                          chunksize=transactions_chunk_size)
-
-    training["price_per_day"] = training["actual_amount_paid"]/(training["payment_plan_days"]+0.01)
     training["usual_price_per_day"] = 0
 
-    print("starting iteration, looking for usual payment method...")
-    for transactions in df_iter:
-        print("i=" + str(i))
-        i += 1
-
-        transactions = reformat_transactions(transactions)
-        transactions["current_price_per_day"] = transactions["actual_amount_paid"] / (transactions["payment_plan_days"] + 0.01)
-        transactions = transactions.groupby("msno").sum()
-        columns_to_keep = ["current_price_per_day"]
-        transactions = transactions[columns_to_keep]
-
-        training = pd.merge(left=training, right=transactions, how='left', left_index=True, right_index=True)
-
-        training["usual_price_per_day"] += training["current_price_per_day"]
-        training.drop(['current_price_per_day'], axis=1, inplace=True)
-
-        if i > 0:
-            break
+    training = iterate_on_transactions(training=training, version=1)
+    training = iterate_on_transactions(training=training, version=2)
 
     training["usual_price_per_day"] /= (training["total_number_of_transactions"] + 0.01)
 
@@ -160,13 +179,8 @@ if __name__ == "__main__":
         make_csv(todo=todo)
     if len(sys.argv) is 3:
         todo = sys.argv[1]
-        path_to_data = sys.argv[2]
-        make_csv(todo=todo, path_to_data=path_to_data)
-    if len(sys.argv) is 4:
-        todo = sys.argv[1]
-        path_to_data = sys.argv[2]
-        transactions_chunk_size = sys.argv[3]
-        make_csv(todo=todo, path_to_data=path_to_data, transactions_chunk_size=int(transactions_chunk_size))
+        transactions_chunk_size = sys.argv[2]
+        make_csv(todo=todo, transactions_chunk_size=int(transactions_chunk_size))
     else:
-        print("error: more than 3 arguments")
+        print("error: more than 2 arguments")
 
