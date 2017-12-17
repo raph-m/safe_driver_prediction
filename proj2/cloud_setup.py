@@ -14,7 +14,7 @@ echo "source "/usr/bin/virtualenvwrapper.sh"" >> .bashrc
 echo "export WORKON_HOME="/opt/virtual_env/"" >> .bashrc
 source `which virtualenvwrapper.sh`
 sudo pip install pandas
-
+git clone https://github.com/raph-m/safe_driver_prediction
 """
 
 bashCommand = "cwm --rdf test.rdf --ntriples > test.nt"
