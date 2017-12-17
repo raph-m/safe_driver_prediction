@@ -1,10 +1,14 @@
 import time
 
+"/home/montaud_raphael/safe_driver_prediction/proj2/testing.csv"
+
 from xgboost import XGBClassifier
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from tools import log_loss, to_csv
+
+path_to_data = "/home/raph/Downloads/"
 
 feature_selection = "none"
 number_of_features = 10
@@ -41,10 +45,27 @@ parameters = {
 # Part 1 - Data Preprocessing
 # Importing the dataset
 dataset = pd.read_csv('training.csv')
+print(dataset.columns)
+i = 0
+msno_index = 0
+is_churn_index = 0
+
+for c in dataset.columns:
+    if c=="is_churn":
+        print("is_churn")
+        is_churn_index = i
+    if c=="msno":
+        print("msno")
+        msno_index = i
 
 
-X = dataset.iloc[:, 2:].values
-y = dataset.iloc[:, 1].values
+mask = []
+for i in range(len(dataset.columns)):
+    if i not in [msno_index, is_churn_index]:
+        mask.append(i)
+
+X = dataset.iloc[:, mask].values
+y = dataset.iloc[:, is_churn_index].values
 
 column_ranges = []
 

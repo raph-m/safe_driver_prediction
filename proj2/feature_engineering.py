@@ -123,22 +123,22 @@ def make_csv(todo="train", path_to_data=path_to_data, transactions_chunk_size=de
 
         t["price_per_day"] = t["actual_amount_paid"]/(t["payment_plan_days"]+0.01)
 
-        print("starting iteration, looking for usual price per day...")
-        for transactions in df_iter:
-            print("i=" + str(i))
-            i += 1
-
-            transactions = reformat_transactions(transactions)
-            transactions["current_price_per_day"] = transactions["actual_amount_paid"] / (transactions["payment_plan_days"] + 0.01)
-            transactions = transactions.groupby("msno").sum()
-            columns_to_keep = ["current_price_per_day"]
-            transactions = transactions[columns_to_keep]
-
-            t = pd.merge(left=t, right=transactions, how='left', left_index=True, right_index=True)
-
-            t["current_price_per_day"] = t.current_price_per_day.apply(lambda x: int(x) if pd.notnull(x) else 0)
-            t["usual_price_per_day"] += t["current_price_per_day"]
-            t.drop(['current_price_per_day'], axis=1, inplace=True)
+        # print("starting iteration, looking for usual price per day...")
+        # for transactions in df_iter:
+        #     print("i=" + str(i))
+        #     i += 1
+        #
+        #     transactions = reformat_transactions(transactions)
+        #     transactions["current_price_per_day"] = transactions["actual_amount_paid"] / (transactions["payment_plan_days"] + 0.01)
+        #     transactions = transactions.groupby("msno").sum()
+        #     columns_to_keep = ["current_price_per_day"]
+        #     transactions = transactions[columns_to_keep]
+        #
+        #     t = pd.merge(left=t, right=transactions, how='left', left_index=True, right_index=True)
+        #
+        #     t["current_price_per_day"] = t.current_price_per_day.apply(lambda x: int(x) if pd.notnull(x) else 0)
+        #     t["usual_price_per_day"] += t["current_price_per_day"]
+        #     t.drop(['current_price_per_day'], axis=1, inplace=True)
 
         return t
 
