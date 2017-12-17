@@ -33,8 +33,6 @@ def to_csv(y_pred, ids):
         spamwriter = csv.writer(csvfile, delimiter=',')
         spamwriter.writerow(['id', 'target'])
         for i in range(len(y_pred)):
-            if len(y_pred) % 10000 == 0:
-                print(str(100*float(i)/len(y_pred))+"% of the data copied in csv file")
             spamwriter.writerow([ids[i], y_pred[i]])
 
 
