@@ -104,9 +104,9 @@ def make_csv(todo="train", path_to_data=path_to_data, transactions_chunk_size=de
             reformat_transactions(transactions)
             recent_transactions = transactions.sort_values(['transaction_date']).groupby('msno').first()
             recent_transactions.reset_index(inplace=True)
-            temp_t = pd.merge(left=t_copy, right=recent_transactions, how='right', on=['msno'], right_index=True)
+            temp_t = pd.merge(left=t_copy, right=recent_transactions, how='inner', on=['msno'])
             t = pd.concat((t, temp_t))
-            t = t.sort_values(['transaction_date']).groupby('msno').first()
+            t = t.sort_values(['transaction_date'], ascending=False).groupby('msno').first()
 
             print("memory usage of t: ")
             print(memory_usage(t))
@@ -137,6 +137,7 @@ def make_csv(todo="train", path_to_data=path_to_data, transactions_chunk_size=de
 
             t = pd.merge(left=t, right=transactions, how='left', left_index=True, right_index=True)
 
+            t["current_price_per_day"] = t.current_price_per_day.apply(lambda x: int(x) if pd.notnull(x) else 0)
             t["usual_price_per_day"] += t["current_price_per_day"]
             t.drop(['current_price_per_day'], axis=1, inplace=True)
 
