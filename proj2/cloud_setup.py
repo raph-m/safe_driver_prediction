@@ -56,6 +56,8 @@ cd safe_driver_prediction
 echo "ENV_NAME=vm" > .env
 cd proj2
 python feature_engineering.py
+sudo apt-get install build-essential
+pip install xgboost
 """
 
 bashCommand = "cwm --rdf test.rdf --ntriples > test.nt"

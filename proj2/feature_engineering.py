@@ -87,9 +87,6 @@ def make_csv(todo="train", path_to_data=path_to_data, transactions_chunk_size=de
             print(memory_usage(transactions))
             i += 1
 
-            if i > 0:
-                break
-
         print("end of iteration...")
 
         i = 0
@@ -115,8 +112,6 @@ def make_csv(todo="train", path_to_data=path_to_data, transactions_chunk_size=de
             print(memory_usage(transactions))
 
             i += 1
-            if i > 0:
-                break
 
         del training_copy
 
@@ -142,9 +137,6 @@ def make_csv(todo="train", path_to_data=path_to_data, transactions_chunk_size=de
 
             training["usual_price_per_day"] += training["current_price_per_day"]
             training.drop(['current_price_per_day'], axis=1, inplace=True)
-
-            if i > 0:
-                break
 
         return training
 
