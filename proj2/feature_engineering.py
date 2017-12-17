@@ -2,7 +2,7 @@ import pandas as pd
 from datetime import datetime
 from collections import Counter
 from datetime import timedelta
-from proj2.tools import change_datatype, change_datatype_float, memory_usage
+from tools import change_datatype, change_datatype_float, memory_usage
 import time
 
 
