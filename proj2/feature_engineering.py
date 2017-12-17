@@ -1,14 +1,15 @@
 import pandas as pd
 from datetime import datetime
 from collections import Counter
-
-from proj2.tools import change_datatype, change_datatype_float
+from datetime import timedelta
+from proj2.tools import change_datatype, change_datatype_float, memory_usage
+import time
 
 path_to_data = "/media/raph/Elements/ml1/churn/"
 transactions_chunk_size = 30000
 todo = "train"
 
-if todo =="train":
+if todo == "train":
     max_date = datetime.strptime("20170201", "%Y%m%d").date()
 else:
     max_date = datetime.strptime("20170301", "%Y%m%d").date()
@@ -55,9 +56,6 @@ def reformat_transactions(df):
     df = df.take(list(indexes_to_keep))
     return df
 
-df_iter = pd.read_csv(path_to_data + 'transactions.csv', low_memory=False, iterator=True,
-                      chunksize=transactions_chunk_size)
-
 training["total_number_of_transactions"] = 0
 
 training["current_number_of_transactions"] = 0
@@ -65,6 +63,8 @@ training.drop(['current_number_of_transactions'], axis=1, inplace=True)
 
 
 i = 0
+df_iter = pd.read_csv(path_to_data + 'transactions.csv', low_memory=False, iterator=True,
+                      chunksize=transactions_chunk_size)
 print("starting iteration...")
 for transactions in df_iter:
     print("i=" + str(i))
@@ -78,13 +78,21 @@ for transactions in df_iter:
         lambda x: int(x) if pd.notnull(x) else 0)
     training["total_number_of_transactions"] += training["current_number_of_transactions"]
     training.drop(['current_number_of_transactions'], axis=1, inplace=True)
+
+    print("memory usage of training: ")
+    print(memory_usage(training))
+    print("memory usage of transactions: ")
+    print(memory_usage(transactions))
     i += 1
+print("end of iteration...")
 
 
 i = 0
 training.reset_index(inplace=True)
 training_copy = training.copy()
 
+df_iter = pd.read_csv(path_to_data + 'transactions.csv', low_memory=False, iterator=True,
+                      chunksize=transactions_chunk_size)
 print("starting iteration, looking for most recent transaction...")
 for transactions in df_iter:
     print("i=" + str(i))
@@ -99,5 +107,47 @@ for transactions in df_iter:
     i += 1
 
 del training_copy
+
+
+i = 0
+
+df_iter = pd.read_csv(path_to_data + 'transactions.csv', low_memory=False, iterator=True,
+                      chunksize=transactions_chunk_size)
+
+training["price_per_day"] = training["actual_amount_paid"]/(training["payment_plan_days"]+0.01)
+training["usual_price_per_day"] = 0
+
+print("starting iteration, looking for usual payment method...")
+for transactions in df_iter:
+    print("i=" + str(i))
+    i += 1
+
+    transactions = reformat_transactions(transactions)
+    transactions["current_price_per_day"] = transactions["actual_amount_paid"] / (transactions["payment_plan_days"] + 0.01)
+    transactions = transactions.groupby("msno").sum()
+    columns_to_keep = ["current_price_per_day"]
+    transactions = transactions[columns_to_keep]
+
+    training = pd.merge(left=training, right=transactions, how='left', left_index=True, right_index=True)
+
+    training["usual_price_per_day"] += training["current_price_per_day"]
+    training.drop(['current_price_per_day'], axis=1, inplace=True)
+
+    if i > 0:
+        break
+
+training["usual_price_per_day"] /= (training["total_number_of_transactions"] + 0.01)
+
+if todo == "test":
+    time_delta = timedelta(days=-31)
+else:
+    time_delta = timedelta(days=0)
+
+
+training["membership_expire_date"] = training.membership_expire_date.apply(lambda x: x + time_delta if not pd.isnull(x) else x)
+training["transaction_date"] = training.transaction_date.apply(lambda x: x + time_delta if not pd.isnull(x) else x)
+
+training['membership_expire_date'] = training.membership_expire_date.apply(lambda x: time.mktime(x.timetuple()) if not (pd.isnull(x) or type(x)==type(0.1)) else 0.0)
+training['transaction_date'] = training.membership_expire_date.apply(lambda x: time.mktime(x.timetuple()) if not (pd.isnull(x) or type(x)==type(0.1)) else 0.0)
 
 training.to_csv(path_or_buf=todo+"ing.csv")
