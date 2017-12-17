@@ -54,7 +54,8 @@ sudo apt-get install unzip
 unzip data.zip
 cd safe_driver_prediction
 echo "ENV_NAME=vm" > .env
-python proj2/feature_engineering.py
+cd proj2
+python feature_engineering.py
 """
 
 bashCommand = "cwm --rdf test.rdf --ntriples > test.nt"

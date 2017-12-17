@@ -9,10 +9,12 @@ load_dotenv(dotenv_path)
 
 ENV_NAME = os.environ.get("ENV_NAME")
 
-path_to_data = "/media/raph/Elements/ml1/churn/"
-default_transaction_chunk_size = 30000
+path_to_data = "../../churn/"
+default_transaction_chunk_size = 3000000
 
 if ENV_NAME == "raph":
+    path_to_data = "/media/raph/Elements/ml1/churn/"
+    default_transaction_chunk_size = 30000
     print("running on raph environment...")
 
 if ENV_NAME == "vm":
