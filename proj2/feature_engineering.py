@@ -49,7 +49,7 @@ def make_csv(todo="train", path_to_data=path_to_data, transactions_chunk_size=de
         df['membership_expire_date'] = df.membership_expire_date.apply(
             lambda x: datetime.strptime(str(int(x)), "%Y%m%d").date() if pd.notnull(x) else "NAN")
         df['payment_method_id'] = df.payment_method_id.apply(lambda x: int(x) if pd.notnull(x) else -1)
-        boolean_indexes = df["transaction_date"] < max_date
+        boolean_indexes = df["transaction_date"] > max_date
         indexes_to_drop = [e[0] if e[1] else None for e in boolean_indexes.iteritems()]
         indexes_to_keep = set(range(df.shape[0])) - set(indexes_to_drop)
         df = df.take(list(indexes_to_keep))
@@ -72,10 +72,11 @@ def make_csv(todo="train", path_to_data=path_to_data, transactions_chunk_size=de
         for transactions in df_iter:
             print("i=" + str(i))
             i += 1
-
             transactions = reformat_transactions(transactions)
+            print(transactions.head())
             user_count = Counter(transactions['msno']).most_common()
             user_count = pd.DataFrame(user_count)
+            print(user_count)
             user_count.columns = ['msno', 'current_number_of_transactions']
             user_count.set_index('msno', inplace=True)
             t = pd.merge(left=t, right=user_count, how='left', left_index=True, right_index=True)
