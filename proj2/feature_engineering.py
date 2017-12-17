@@ -73,10 +73,8 @@ def make_csv(todo="train", path_to_data=path_to_data, transactions_chunk_size=de
             print("i=" + str(i))
             i += 1
             transactions = reformat_transactions(transactions)
-            print(transactions.head())
             user_count = Counter(transactions['msno']).most_common()
             user_count = pd.DataFrame(user_count)
-            print(user_count)
             user_count.columns = ['msno', 'current_number_of_transactions']
             user_count.set_index('msno', inplace=True)
             t = pd.merge(left=t, right=user_count, how='left', left_index=True, right_index=True)
