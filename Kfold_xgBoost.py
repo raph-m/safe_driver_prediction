@@ -1,4 +1,3 @@
-import json
 import time
 
 import xgboost as xgb
@@ -6,12 +5,11 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
 
-from util import gini_normalized, gini_xgb
-from feature_selection_1 import get_cached_features, continuous_values, categorical_features
+from util import gini_xgb
 from preprocessing import preproc
 
 
-# Part 1 - Data Preprocessing
+####################### Data Preprocessing #####################
 # Importing the training dataset
 dataset_train = pd.read_csv('train.csv')
 
@@ -23,12 +21,11 @@ X_train, y_train = preproc(dataset_train, mode="train", oneHot=False)
 X_test, y_test = preproc(dataset_test, mode="test", oneHot=True)
 
 
-# xgboost training
-
+####################### Training #####################
 i = 0
 K = 5  # number of folds
 kf = KFold(n_splits=K, random_state=42, shuffle=True)
-# 5 Cross Validation
+# KFold Cross Validation
 results = []
 for train_index, test_index in kf.split(X_train):
     train_X, valid_X = X_train[train_index], X_train[test_index]

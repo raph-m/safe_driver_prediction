@@ -37,20 +37,23 @@ parameters = {
     }
 }
 
-# Part 1 - Data Preprocessing
+
+####################### Data Preprocessing #####################
 # Importing the dataset
 dataset = pd.read_csv('train.csv')
-
+# Preprocess
 X, y = preproc(dataset, mode='train', oneHot=False)
 # Splitting the dataset into the Training set and Test set
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
-
 
 # create dataset for lightgbm
 lgb_train = lgb.Dataset(X_train, y_train)
 lgb_eval = lgb.Dataset(X_test, y_test, reference=lgb_train)
 
-# specify your configurations as a dict
+
+
+####################### Training #####################
+# parameters
 params = {
     'task': 'train',
     'boosting_type': 'gbdt',
@@ -79,8 +82,9 @@ print('Save model...')
 # save model to file
 gbm.save_model('model.txt')
 
+
+####################### Prediction #####################
 print('Start predicting...')
-# predict
 y_pred = gbm.predict(X_test, num_iteration=gbm.best_iteration)
 y_pred_train = gbm.predict(X_train, num_iteration=gbm.best_iteration)
 
