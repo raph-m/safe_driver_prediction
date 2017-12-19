@@ -14,30 +14,34 @@ from feature_selection_1 import get_cached_features, continuous_values, categori
 
 feature_selection = "none"
 number_of_features = 10
-alpha = 32
-max_depth = 4
+alpha = 1.6
+max_depth = 6
 n_estimators = 100
-loss = "rank:pairwise"
+loss = 'binary:logistic'  # "rank:pairwise"
 subsample = 0.8
-learning_rate = 0.05
-colsample_bytree = 0.8
-gamma = 9
+learning_rate = 0.09
+min_child_weight=0.77
+colsample_bytree = 0.75
+gamma = 10
+reg_alpha=8
+reg_lambda=1.3
+eval_metric='auc'
 
 parameters = {
-	"feature_selection": {
-		"name": feature_selection,
-		"number_of_features": number_of_features
-	},
-	"classifier": {
-		"name": "xgboost",
-		"loss":
-			{
-				"name": loss,
-				"alpha": alpha
-			},
-		"max_depth": max_depth,
-		"n_estimators": n_estimators
-	}
+    "feature_selection": {
+        "name": feature_selection,
+        "number_of_features": number_of_features
+    },
+    "classifier": {
+        "name": "xgboost",
+        "loss":
+            {
+                "name": loss,
+                "alpha": alpha
+            },
+        "max_depth": max_depth,
+        "n_estimators": n_estimators
+    }
 }
 
 # Part 1 - Data Preprocessing
@@ -58,7 +62,7 @@ y = dataset.iloc[:, 1].values
 
 column_ranges = []
 
-print("replacing missing values")
+print("replacing missing values and encode categorical features")
 t0 = time.time()
 print("number of examples: "+str(len(X[:, 0])))
 for i in range(len(X[0, :])):
@@ -85,13 +89,17 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 print("training classifier")
 classifier = XGBClassifier(
-	subsample=subsample,
-	max_depth=max_depth,
-	scale_pos_weight=alpha,
-	objective=loss,
-	gamma=gamma,
-	colsample_bytree=colsample_bytree,
-	learning_rate=learning_rate
+    subsample=subsample,
+    max_depth=max_depth,
+    scale_pos_weight=alpha,
+    objective=loss,
+    gamma=gamma,
+    colsample_bytree=colsample_bytree,
+    learning_rate=learning_rate,
+    min_child_weight=min_child_weight,
+    reg_alpha=reg_alpha,
+    reg_lambda=reg_lambda
+    #eval_metric=eval_metric
 )
 t2 = time.time()
 classifier.fit(X_train, y_train)
@@ -136,5 +144,3 @@ results = json.loads(results_txt)
 f = open("results.json", "w")
 f.write(json.dumps(results))
 f.close()
-
-

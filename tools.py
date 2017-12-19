@@ -25,10 +25,6 @@ names = names_str.split(",")
 
 import matplotlib.pyplot as plt
 import numpy as np
-y_test = np.loadtxt("y_test")
-y_pred = np.loadtxt("y_pred")
-y_train = np.loadtxt("y_train")
-y_pred_train = np.loadtxt("y_pred_train")
 
 
 def to_csv(y_pred, ids):
@@ -54,6 +50,11 @@ def plot_accuracy(a, p):
 
 def plot_cap_curve(a, p):
 
+    y_test = np.loadtxt("y_test")
+    y_pred = np.loadtxt("y_pred")
+    y_train = np.loadtxt("y_train")
+    y_pred_train = np.loadtxt("y_pred_train")
+
     number_of_pos = int(np.sum(a))
     index = np.argsort(p)[::-1]
 
@@ -74,5 +75,16 @@ def plot_cap_curve(a, p):
 
     plt.show()
 
-plot_cap_curve(y_test, y_pred)
-plot_cap_curve(y_train, y_pred_train)
+y_test_pred = np.loadtxt("y_test_pred")
+
+y_test_pred = y_test_pred - np.min(y_test_pred)
+y_test_pred /= (np.max(y_test_pred))
+
+print(np.max(y_test_pred))
+print(np.min(y_test_pred))
+
+import pandas as pd
+test = pd.read_csv('test.csv')
+ids = test.iloc[:, 0].values
+
+to_csv(y_test_pred, ids)
