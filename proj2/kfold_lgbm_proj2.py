@@ -1,13 +1,13 @@
+from datetime import datetime
+import time
+
+from sklearn.model_selection import KFold
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import KFold
 
 from preprocessing import preproc
 from tools import log_loss_lgbm
-
-from datetime import datetime
-import time
 
 path_to_data = "/home/raph/Downloads/"
 

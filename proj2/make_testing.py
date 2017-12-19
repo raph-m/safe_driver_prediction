@@ -1,27 +1,21 @@
-# coding: utf-8
-
-# In[1]:
-
-
-import pandas as pd
-from datetime import datetime
-from collections import Counter
-from datetime import timedelta
+from datetime import datetime, timedelta
 import time
+
+from collections import Counter
+import pandas as pd
 import numpy as np
 
-
-# In[2]:
+print("hey thats a new version")
 
 
 def change_datatype(df):
     int_cols = list(df.select_dtypes(include=['int']).columns)
     for col in int_cols:
-        if ((np.max(df[col]) <= 127) and (np.min(df[col] >= -128))):
+        if np.max(df[col]) <= 127 and np.min(df[col] >= -128):
             df[col] = df[col].astype(np.int8)
-        elif ((np.max(df[col]) <= 32767) and (np.min(df[col] >= -32768))):
+        elif np.max(df[col]) <= 32767 and np.min(df[col] >= -32768):
             df[col] = df[col].astype(np.int16)
-        elif ((np.max(df[col]) <= 2147483647) and (np.min(df[col] >= -2147483648))):
+        elif np.max(df[col]) <= 2147483647 and np.min(df[col] >= -2147483648):
             df[col] = df[col].astype(np.int32)
         else:
             df[col] = df[col].astype(np.int64)
@@ -38,16 +32,10 @@ def memory_usage(df):
     return mem / 1024 ** 2, " MB"
 
 
-# In[3]:
-
-
 path_to_data = "../../churn/"
 transactions_chunk_size = 10000000
 todo = "test"
 date_zero = datetime.strptime("20000101", "%Y%m%d").date()
-
-# In[4]:
-
 
 if todo == "train":
     max_date = datetime.strptime("20170201", "%Y%m%d").date()
@@ -56,7 +44,6 @@ else:
 
 if todo == "train":
     train = pd.read_csv(path_to_data + todo + "_v2.csv")
-
 else:
     train = pd.read_csv(path_to_data + "test_v2.csv")
 
@@ -86,33 +73,18 @@ training.set_index('msno', inplace=True)
 change_datatype(training)
 change_datatype_float(training)
 
-# In[5]:
-
-
-training.head()
-
-
-# In[6]:
-
 
 def reformat_transactions(df):
-    start_time = time.time()
     df['transaction_date'] = df.transaction_date.apply(
         lambda x: datetime.strptime(str(int(x)), "%Y%m%d").date() if pd.notnull(x) else date_zero)
     df['membership_expire_date'] = df.membership_expire_date.apply(
         lambda x: datetime.strptime(str(int(x)), "%Y%m%d").date() if pd.notnull(x) else date_zero)
     df['payment_method_id'] = df.payment_method_id.apply(lambda x: int(x) if pd.notnull(x) else -1)
     boolean_indexes = df["transaction_date"] > max_date
-    start_loop = time.time()
     indexes_to_drop = [e[0] if e[1] else None for e in boolean_indexes.iteritems()]
-    end_loop = time.time()
     indexes_to_keep = set(range(df.shape[0])) - set(indexes_to_drop)
     df = df.take(list(indexes_to_keep))
-    end_time = time.time()
     return df
-
-
-# In[7]:
 
 
 def iterate_on_transactions_1(t, version=1):
@@ -142,34 +114,16 @@ def iterate_on_transactions_1(t, version=1):
         t["total_number_of_transactions"] += t["current_number_of_transactions"]
         t.drop(['current_number_of_transactions'], axis=1, inplace=True)
 
-        if i > 5:
-            break
-
     print("end of iteration...")
     return t
 
-
-# In[8]:
-
-
 training["total_number_of_transactions"] = 0
-t = training.copy()
-t = iterate_on_transactions_1(t, version=1)
-t = iterate_on_transactions_1(t, version=2)
+u = training.copy()
+u = iterate_on_transactions_1(u, version=1)
+u = iterate_on_transactions_1(u, version=2)
 
-# In[9]:
-
-
-t.head()
-
-# In[10]:
-
-
-training = t
-del t
-
-
-# In[11]:
+training = u
+del u
 
 
 def iterate_on_transactions_2(t):
@@ -188,19 +142,10 @@ def iterate_on_transactions_2(t):
         reformat_transactions(transactions)
         recent_transactions = transactions.sort_values(['transaction_date']).groupby('msno').first()
         recent_transactions.reset_index(inplace=True)
-        print("recent_transactions.columns")
-        print(recent_transactions.columns)
         temp_t = pd.merge(left=t_copy, right=recent_transactions, how='inner', on=['msno'])
-        print("temp_t.columns")
-        print(temp_t.columns)
         t = pd.concat((t, temp_t))
-        print("t.columns")
-        print(t.columns)
         t = t.sort_values(['transaction_date'], ascending=False).groupby('msno').first()
         i += 1
-
-        if i > 3:
-            break
 
     print("end of iteration...")
 
@@ -217,41 +162,17 @@ def iterate_on_transactions_2(t):
         reformat_transactions(transactions)
         recent_transactions = transactions.sort_values(['transaction_date']).groupby('msno').first()
         recent_transactions.reset_index(inplace=True)
-        print("recent_transactions.columns")
-        print(recent_transactions.columns)
         temp_t = pd.merge(left=t_copy, right=recent_transactions, how='inner', on=['msno'])
-        print("temp_t.columns")
-        print(temp_t.columns)
         t = pd.concat((t, temp_t))
-        print("t.columns")
-        print(t.columns)
         t = t.sort_values(['transaction_date'], ascending=False).groupby('msno').first()
         i += 1
 
-        if i > 3:
-            break
-
     return t
 
+u = training.copy()
+u = iterate_on_transactions_2(u)
 
-# In[12]:
-
-
-t = training.copy()
-t = iterate_on_transactions_2(t)
-
-# In[13]:
-
-
-t.head()
-
-# In[14]:
-
-
-training = t
-
-
-# In[15]:
+training = u
 
 
 def iterate_on_transactions_3(t, version=1):
@@ -270,7 +191,6 @@ def iterate_on_transactions_3(t, version=1):
     for transactions in df_iter:
         print("i=" + str(i))
         i += 1
-
         transactions = reformat_transactions(transactions)
         transactions["current_price_per_day"] = transactions["actual_amount_paid"] / (
             transactions["payment_plan_days"] + 0.01)
@@ -284,68 +204,39 @@ def iterate_on_transactions_3(t, version=1):
         t["usual_price_per_day"] += t["current_price_per_day"]
         t.drop(['current_price_per_day'], axis=1, inplace=True)
 
-        if i > 3:
-            break
-
     return t
 
+u = training.copy()
+u["usual_price_per_day"] = 0
 
-# In[16]:
+u["price_per_day"] = u["actual_amount_paid"] / (u["payment_plan_days"] + 0.01)
+u = iterate_on_transactions_3(u, version=1)
+u = iterate_on_transactions_3(u, version=2)
 
+training = u
 
-t = training.copy()
-t["usual_price_per_day"] = 0
+u = training.copy()
+u["price_per_day"] = u.price_per_day.apply(lambda x: x if pd.notnull(x) else 0.0)
+u["usual_price_per_day"] /= (u["total_number_of_transactions"] + 0.01)
+u["price_per_day_diff"] = u["price_per_day"] - u["usual_price_per_day"]
+u.head()
 
-t["price_per_day"] = t["actual_amount_paid"] / (t["payment_plan_days"] + 0.01)
-t = iterate_on_transactions_3(t, version=1)
-t = iterate_on_transactions_3(t, version=2)
+training = u
 
-# In[17]:
-
-
-t.head()
-
-# In[18]:
-
-
-training = t
-
-# In[19]:
-
-
-t = training.copy()
-t["price_per_day"] = t.price_per_day.apply(lambda x: x if pd.notnull(x) else 0.0)
-t["usual_price_per_day"] /= (t["total_number_of_transactions"] + 0.01)
-t["price_per_day_diff"] = t["price_per_day"] - t["usual_price_per_day"]
-t.head()
-
-# In[20]:
-
-
-training = t
-
-# In[21]:
-
-
-t = training.copy()
+u = training.copy()
 if todo == "test":
     time_delta = timedelta(days=-31)
 else:
     time_delta = timedelta(days=0)
 
-t["membership_expire_date"] = t.membership_expire_date.apply(lambda x: x + time_delta if not pd.isnull(x) else x)
-t["transaction_date"] = t.transaction_date.apply(lambda x: x + time_delta if not pd.isnull(x) else x)
+u["membership_expire_date"] = u.membership_expire_date.apply(lambda x: x + time_delta if not pd.isnull(x) else x)
+u["transaction_date"] = u.transaction_date.apply(lambda x: x + time_delta if not pd.isnull(x) else x)
 
-t['membership_expire_date'] = t.membership_expire_date.apply(
+u['membership_expire_date'] = u.membership_expire_date.apply(
     lambda x: time.mktime(x.timetuple()) if not (pd.isnull(x) or type(x) == type(0.1)) else 0.0)
-t['transaction_date'] = t.membership_expire_date.apply(
+u['transaction_date'] = u.membership_expire_date.apply(
     lambda x: time.mktime(x.timetuple()) if not (pd.isnull(x) or type(x) == type(0.1)) else 0.0)
 
-# In[22]:
-
-
-t.describe()
+u.describe()
 
 training.to_csv(path_or_buf=todo + "ing.csv")
-
-
