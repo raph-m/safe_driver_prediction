@@ -33,7 +33,7 @@ params = {
     'task': 'train',
     'boosting_type': 'gbdt',
     'objective': 'regression',
-    'metric': {'l2', 'auc'},
+    'metric': {'gini'},
     'num_leaves': 31,
     'learning_rate': 0.05,
     'feature_fraction': 0.9,
@@ -47,56 +47,23 @@ K = 5
 kf = KFold(n_splits=K, random_state=42, shuffle=True)
 #training with KFold Cross Validation
 results = []
+weights = np.zeros(len(y_train))
+weights[y_train == 0] = 1
+weights[y_train == 1] = 2
 #print('Start training...')
 for train_index, test_index in kf.split(X_train):
-    lgb_train = lgb.Dataset(X_train[train_index], y_train[train_index])
-    lgb_eval = lgb.Dataset(X_train[test_index], y_train[test_index], reference=lgb_train)
+    lgb_train = lgb.Dataset(X_train[train_index], y_train[train_index], weight=weights[train_index])
+    lgb_eval = lgb.Dataset(X_train[test_index], y_train[test_index], reference=lgb_train, weight=weights[test_index])
     gbm = lgb.train(params,
-        lgb_train,
-        num_boost_round=100,
+        train_set=lgb_train,
+        num_boost_round=200,
         valid_sets=lgb_eval,
         early_stopping_rounds=10,
         verbose_eval=5,
-        feval = gini_lgbm)
+        feval=gini_lgbm)
     res = gbm.predict(X_test)
     i+=1
     results.append(res)
 
 submission = pd.DataFrame((results[0] + results[1] + results[2] + results[3] + results[4]) / 5)
-
-####################### Prediction #####################
-#print('Start predicting...')
-#y_pred = gbm.predict(X_test, num_iteration=gbm.best_iteration)
-#y_pred_train = gbm.predict(X_train, num_iteration=gbm.best_iteration)
-
-#print("gini normalized score (train): ")
-#gini_score = gini_normalized(y_train, y_pred_train)
-#print(gini_score)
-
-#print("gini normalized score (test): ")
-#gini_score = gini_normalized(y_test, y_pred)
-#print(gini_score)
-
-#np.savetxt("y_test", y_test)
-#np.savetxt("y_pred", y_pred)
-
-#np.savetxt("y_train", y_test)
-#np.savetxt("y_pred_train", y_pred)
-
-#print("mean de y pred")
-#print(np.mean(y_pred))
-
-#parameters.update({
-#    "result": {
-#        "gini_score": gini_score
-#}})
-
-#f = open("results.json", "r")
-#results_txt = f.read()
-#f.close()
-#results = json.loads(results_txt)
-# décommenter cette ligne si vous voulez sauvegarder les résultats
-# results.append(parameters)
-#f = open("results.json", "w")
-#f.write(json.dumps(results))
-#f.close()
+submission.to_csv('sumbission_5Kfold_lgbm.csv')

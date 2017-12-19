@@ -30,4 +30,5 @@ def gini_xgb(preds, dtrain):
 def gini_lgbm(preds, dtrain):
     labels = dtrain.get_label()
     gini_score = gini_normalized(labels, preds)
-    return [('gini', gini_score, True)]
+    print (gini_score)
+    return 'gini', np.array(gini_score), True
