@@ -2,21 +2,19 @@ import json
 
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from keras.models import Sequential
-from keras.layers import Dense
 from sklearn.metrics import confusion_matrix
 
-from util import gini_normalized, gini
-from parameters import parameters, batch_size, epochs, layers, activation_functions, loss, alpha
-from feature_selection_1 import get_cached_features, continuous_values
+from util import gini_normalized
+from parameters import parameters, alpha
+from feature_selection_1 import get_cached_features
 
 
 # Part 1 - Data Preprocessing
 # Importing the dataset
-dataset = pd.read_csv('train.csv')
+path_to_data = "../data/"
+dataset = pd.read_csv(path_to_data+'train.csv')
 
 # feature selection
 categorical_features = get_cached_features(parameters["feature_selection"])
