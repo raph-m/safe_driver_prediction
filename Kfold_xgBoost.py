@@ -18,7 +18,7 @@ dataset_test = pd.read_csv('test.csv')
 
 # preprocessing both sets
 X_train, y_train = preproc(dataset_train, mode="train", oneHot=False)
-X_test, y_test = preproc(dataset_test, mode="test", oneHot=True)
+X_test, y_test = preproc(dataset_test, mode="test", oneHot=False)
 
 
 ####################### Training #####################
