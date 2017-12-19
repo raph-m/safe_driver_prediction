@@ -1,14 +1,16 @@
 import json
 import time
 
+import xgboost as xgb
 from xgboost import XGBClassifier
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
 
-from util import gini_normalized
+from util import gini_normalized, gini_xgb
 from feature_selection_1 import get_cached_features, continuous_values, categorical_features
-cat_feat = [3, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33]
 
 feature_selection = "none"
 number_of_features = 10
@@ -48,8 +50,8 @@ dataset = pd.read_csv('train.csv')
 
 # feature selection
 if feature_selection == "infogain":
-    categorical_features = get_cached_features(parameters["feature_selection"])
-    continuous_values = []
+	categorical_features = get_cached_features(parameters["feature_selection"])
+	continuous_values = []
 
 categorical_features_count = len(categorical_features)
 selected_features = categorical_features + continuous_values
@@ -64,21 +66,21 @@ print("replacing missing values and encode categorical features")
 t0 = time.time()
 print("number of examples: "+str(len(X[:, 0])))
 for i in range(len(X[0, :])):
-    if i <= categorical_features_count:
-        # si c'est une variable de catégories, on prend comme stratégie de remplacer par la
-        # valeur la plus fréquente
-        (values, counts) = np.unique(X[:, i], return_counts=True)
-        counts = [counts[i] if values[i] >= 0 else 0 for i in range(len(values))]
-        ind = np.argmax(counts)
-        column_ranges.append(max(values))
-        replacement_value = values[ind]
-    else:
-        # sinon on prend simplement la moyenne
-        replacement_value = np.mean(X[:, i])
+	if i <= categorical_features_count:
+		# si c'est une variable de catégories, on prend comme stratégie de remplacer par la
+		# valeur la plus fréquente
+		(values, counts) = np.unique(X[:, i], return_counts=True)
+		counts = [counts[i] if values[i] >= 0 else 0 for i in range(len(values))]
+		ind = np.argmax(counts)
+		column_ranges.append(max(values))
+		replacement_value = values[ind]
+	else:
+		# sinon on prend simplement la moyenne
+		replacement_value = np.mean(X[:, i])
 
-    for j in range(len(X[:, i])):
-        if X[j, i] < -0.5:
-            X[j, i] = replacement_value
+	for j in range(len(X[:, i])):
+		if X[j, i] < -0.5:
+			X[j, i] = replacement_value
 
 t1 = time.time()
 print(t1-t0)
@@ -104,6 +106,7 @@ classifier.fit(X_train, y_train)
 t3 = time.time()
 print(t3-t2)
 
+
 # Predicting the Test set results
 y_pred = classifier.predict_proba(X_test)[:, 1]
 y_pred_train = classifier.predict_proba(X_train)[:, 1]
@@ -128,8 +131,8 @@ print(np.mean(y_pred))
 y_pred = (y_pred > 0.5)
 
 parameters.update({
-    "result": {
-        "gini_score": gini_score
+	"result": {
+		"gini_score": gini_score
 }})
 
 f = open("results.json", "r")
