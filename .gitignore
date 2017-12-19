@@ -114,7 +114,6 @@ notes
 /y_train
 /.DS_Store
 
-/y_pred_train
 /y_test_pred
 /model.txt
 /*.csv
