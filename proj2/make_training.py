@@ -50,6 +50,8 @@ else:
 members = pd.read_csv(path_to_data + "members_v3.csv")
 
 training = pd.merge(left=train, right=members, how='left', on=['msno'])
+print("merge train and members")
+print(training.describe())
 del train
 del members
 
@@ -121,6 +123,9 @@ training["total_number_of_transactions"] = 0
 u = training.copy()
 u = iterate_on_transactions_1(u, version=1)
 u = iterate_on_transactions_1(u, version=2)
+print("after first iteration: ")
+print(u.describe())
+
 
 training = u
 del u
@@ -171,6 +176,8 @@ def iterate_on_transactions_2(t):
 
 u = training.copy()
 u = iterate_on_transactions_2(u)
+print("after second iteration: ")
+print(u.describe())
 
 training = u
 
@@ -212,6 +219,8 @@ u["usual_price_per_day"] = 0
 u["price_per_day"] = u["actual_amount_paid"] / (u["payment_plan_days"] + 0.01)
 u = iterate_on_transactions_3(u, version=1)
 u = iterate_on_transactions_3(u, version=2)
+print("after second iteration: ")
+print(u.describe())
 
 training = u
 
@@ -219,7 +228,6 @@ u = training.copy()
 u["price_per_day"] = u.price_per_day.apply(lambda x: x if pd.notnull(x) else 0.0)
 u["usual_price_per_day"] /= (u["total_number_of_transactions"] + 0.01)
 u["price_per_day_diff"] = u["price_per_day"] - u["usual_price_per_day"]
-u.head()
 
 training = u
 
@@ -237,6 +245,7 @@ u['membership_expire_date'] = u.membership_expire_date.apply(
 u['transaction_date'] = u.membership_expire_date.apply(
     lambda x: time.mktime(x.timetuple()) if not (pd.isnull(x) or type(x) == type(0.1)) else 0.0)
 
-u.describe()
+print("just before to csv: ")
+print(u.describe())
 
 training.to_csv(path_or_buf=todo + "ing.csv")
