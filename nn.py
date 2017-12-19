@@ -11,36 +11,29 @@
 
 import json
 
-import numpy as np
+#import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from keras.models import Sequential
 from keras.layers import Dense
 from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import KFold
 
 from util import cross_entropy, gini_normalized
 from parameters import parameters, batch_size, epochs, layers, activation_functions, loss, alpha
-from feature_selection_1 import get_cached_features, continuous_values
 from preprocessing import preproc
 
-if loss == "cross_entropy":
-    loss = cross_entropy
-
 # Part 1 - Data Preprocessing
-# Importing the dataset
-dataset = pd.read_csv('train.csv')
+# Importing the train dataset
+dataset_train = pd.read_csv('train.csv')
 
-# preprocessing
-X, y = preproc(dataset, 'train', oneHot=True)
+# Importing the test dataset
+dataset_test = pd.read_csv('test.csv')
 
-# Splitting the dataset into the Training set and Test set
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+# preprocessing train dataset
+X_train, y_train, scaler = preproc(dataset_train, 'train', oneHot=True, scale=True)
 
-# Feature Scaling
-sc = StandardScaler()
-X_train = sc.fit_transform(X_train)
-X_test = sc.transform(X_test)
+# preprocessing test dataset
+X_test, y_test = preproc(dataset_train, 'test', oneHot=True, scale=True, scaler=scaler)
 
 # Part 2 - Now let's make the ANN!
 
@@ -61,48 +54,29 @@ classifier.add(Dense(units = 1, kernel_initializer = 'uniform', activation = 'si
 # Compiling the ANN
 classifier.compile(optimizer = 'adam', loss = loss, metrics = [])
 
-# Fitting the ANN to the Training set
+# Implement KFold cross validation
 class_weight = {0: 1., 1: alpha}
-classifier.fit(X_train, y_train, batch_size = batch_size, epochs = epochs, class_weight=class_weight)
+i=0
+K = 5
+kf = KFold(n_splits=K, random_state=42, shuffle=True)
+#training with KFold Cross Validation
+results = []
+for train_index, test_index in kf.split(X_train):
+    train_x, train_y = X_train[train_index], y_train[train_index]
+    eval_x, eval_y = X_train[test_index], y_train[test_index]
+    classifier.fit(train_x, train_y, batch_size = batch_size, epochs = epochs, class_weight=class_weight)
+    res_eval = classifier.predict(eval_x)
+    res = classifier.predict(X_test)
+    results.append(res)
+    print('gini_eval', i)
+    gini_score = gini_normalized(eval_y, res_eval)
+    print(gini_score)
+    i+=1
 
-# Part 3 - Making the predictions and evaluating the model
-
-# Predicting the Test set results
-y_pred = classifier.predict(X_test)
-
-
-print("gini normalized score: ")
-gini_score = gini_normalized(y_test, y_pred)
-print(gini_score)
-
-import numpy as np
-np.savetxt("y_test", y_test)
-np.savetxt("y_pred", y_pred)
-
-print("mean de y pred")
-print(np.mean(y_pred))
-y_pred = (y_pred > 0.5)
+submission = pd.DataFrame((results[0] + results[1] + results[2] + results[3] + results[4]) / 5)
+#submission.to_csv('sumbission_5Kfold_nn.csv')
 
 # Making the Confusion Matrix
-cm = confusion_matrix(y_test, y_pred)
-print("confusion matrix")
-print(cm)
-
-parameters.update({
-    "result": {
-        "tp": int(cm[0, 0]),
-        "tn": int(cm[1, 1]),
-        "fp": int(cm[1, 0]),
-        "fn": int(cm[0, 1]),
-        "gini_score": gini_score
-}})
-
-f = open("results.json", "r")
-results_txt = f.read()
-f.close()
-results = json.loads(results_txt)
-# décommenter cette ligne si vous voulez sauvegarder les résultats
-# results.append(parameters)
-f = open("results.json", "w")
-f.write(json.dumps(results))
-f.close()
+#cm = confusion_matrix(y_test, y_pred)
+#print("confusion matrix")
+#print(cm)

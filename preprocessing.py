@@ -1,12 +1,12 @@
 import time
 
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from feature_selection_1 import get_cached_features
 
 
-def preproc(dataset, mode, oneHot):
+def preproc(dataset, mode, oneHot, scale=False, scaler=None):
     # categorical and binary features
     categorical_features = [3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 19, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
                             33, 53, 54, 55, 56, 57, 58]
@@ -102,4 +102,11 @@ def preproc(dataset, mode, oneHot):
 
         X = X[:, mask]
 
+        if scale:
+            if scaler == None:
+                sc = StandardScaler()
+                X = sc.fit_transform(X)
+                return X, y, sc
+            else:
+                X = scaler.transform(X)
     return X, y
