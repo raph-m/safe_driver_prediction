@@ -130,3 +130,4 @@ proj2/camboui.ipynb
 /.dotenv
 /proj2/all_in_one.py
 /proj2/prepare_notebook.py
+.idea/codeStyleSettings.xml
