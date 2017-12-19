@@ -131,3 +131,5 @@ proj2/camboui.ipynb
 /proj2/all_in_one.py
 /proj2/prepare_notebook.py
 .idea/codeStyleSettings.xml
+/proj2/5Kfold_lgbm.csv
+/proj2/sumbission_5Kfold_lgbm.csv

@@ -42,7 +42,7 @@ def memory_usage(df):
 
 
 path_to_data = "../../churn/"
-transactions_chunk_size = 3000000
+transactions_chunk_size = 10000000
 todo = "test"
 date_zero = datetime.strptime("20000101", "%Y%m%d").date()
 
@@ -56,12 +56,9 @@ else:
 
 if todo == "train":
     train = pd.read_csv(path_to_data + todo + "_v2.csv")
-    train = pd.concat((train, pd.read_csv(path_to_data + todo + ".csv")), axis=0,
-                      ignore_index=True).reset_index(drop=True)
+
 else:
     train = pd.read_csv(path_to_data + "test_v2.csv")
-    train = pd.concat((train, pd.read_csv(path_to_data + "test.csv")), axis=0,
-                      ignore_index=True).reset_index(drop=True)
 
 members = pd.read_csv(path_to_data + "members_v3.csv")
 

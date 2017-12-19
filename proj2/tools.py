@@ -15,7 +15,6 @@ def to_csv(y_pred, ids):
 
 
 def log_loss(y, p):
-    print("hello")
     p_2 = np.minimum(p, np.ones(len(p))-np.power(10.0, -8))
     p_2 = np.maximum(p_2, np.zeros(len(p))+np.power(10.0, -8))
     return -np.mean(y*np.log(p_2)+(1-y)*np.log(1-p_2))
@@ -51,3 +50,9 @@ def to_int(x):
 
 def to_date(x):
     return datetime.strptime(str(int(x)), "%Y%m%d").date() if pd.notnull(x) else "NAN"
+
+
+def log_loss_lgbm(preds, dtrain):
+    labels = dtrain.get_label()
+    loss = log_loss(labels, preds)
+    return 'log loss', np.array(loss), True
