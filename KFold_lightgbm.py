@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
 
-from util import gini_normalized, gini_lgbm
+from util import gini_lgbm
 from preprocessing import preproc
 
 
@@ -20,12 +20,6 @@ dataset_test = pd.read_csv('test.csv')
 X_train, y_train = preproc(dataset_train, mode='train', oneHot=False)
 X_test, y_test = preproc(dataset_test, mode="test", oneHot=False)
 
-# Splitting the dataset into the Training set and Test set
-#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
-
-# create dataset for lightgbm
-#lgb_train = lgb.Dataset(X_train, y_train)
-#lgb_eval = lgb.Dataset(X_test, y_test, reference=lgb_train)
 
 ####################### Training #####################
 # parameters
@@ -65,5 +59,14 @@ for train_index, test_index in kf.split(X_train):
     i+=1
     results.append(res)
 
-submission = pd.DataFrame((results[0] + results[1] + results[2] + results[3] + results[4]) / 5)
-submission.to_csv('sumbission_5Kfold_lgbm.csv')
+def to_csv(y_pred, ids):
+    import csv
+    with open('sumbission_5Kfold_lightgbm.csv', 'w') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=',')
+        spamwriter.writerow(['id', 'target'])
+        for i in range(len(y_pred)):
+            spamwriter.writerow([ids[i], y_pred[i]])
+
+submission = (results[0] + results[1] + results[2] + results[3] + results[4]) / 5
+idx = dataset_test.iloc[:, 0].values
+to_csv(submission[:,0],idx)

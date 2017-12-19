@@ -22,11 +22,11 @@ X_test, y_test = preproc(dataset_test, mode="test", oneHot=False)
 
 
 ####################### Training #####################
-i = 0
 K = 5  # number of folds
 kf = KFold(n_splits=K, random_state=42, shuffle=True)
 # KFold Cross Validation
 results = []
+i=0
 for train_index, test_index in kf.split(X_train):
     train_X, valid_X = X_train[train_index], X_train[test_index]
     train_y, valid_y = y_train[train_index], y_train[test_index]
@@ -46,5 +46,14 @@ for train_index, test_index in kf.split(X_train):
     # resy.to_csv(str(i)+'fold.csv')
 
 # Creating the submission file
-submission = pd.DataFrame((results[0] + results[1] + results[2] + results[3] + results[4]) / 5)
-# submission.to_csv('sumbission_5kfold_xgboost.csv')
+def to_csv(y_pred, ids):
+    import csv
+    with open('sumbission_5Kfold_xgboost.csv', 'w') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=',')
+        spamwriter.writerow(['id', 'target'])
+        for i in range(len(y_pred)):
+            spamwriter.writerow([ids[i], y_pred[i]])
+
+submission = (results[0] + results[1] + results[2] + results[3] + results[4]) / 5
+idx = dataset_test.iloc[:, 0].values
+to_csv(submission[:,0],idx)
