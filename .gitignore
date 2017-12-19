@@ -128,3 +128,5 @@ proj2/camboui.ipynb
 
 /proj2/training.csv
 /.dotenv
+/proj2/all_in_one.py
+/proj2/prepare_notebook.py

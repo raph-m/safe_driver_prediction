@@ -83,15 +83,9 @@ def make_csv(todo="train", path_to_data=path_to_data, transactions_chunk_size=de
             t["total_number_of_transactions"] += t["current_number_of_transactions"]
             t.drop(['current_number_of_transactions'], axis=1, inplace=True)
 
-            print("memory usage of t: ")
-            print(memory_usage(t))
-            print("memory usage of transactions: ")
-            print(memory_usage(transactions))
-
         print("end of iteration...")
 
         i = 0
-        t.reset_index(inplace=True)
         t_copy = t.copy()
 
         df_iter = pd.read_csv(path_to_csv, low_memory=False, iterator=True,
@@ -99,18 +93,13 @@ def make_csv(todo="train", path_to_data=path_to_data, transactions_chunk_size=de
         print("starting iteration, looking for most recent transaction...")
         for transactions in df_iter:
             print("i=" + str(i))
-
+            t.reset_index(inplace=True)
             reformat_transactions(transactions)
             recent_transactions = transactions.sort_values(['transaction_date']).groupby('msno').first()
             recent_transactions.reset_index(inplace=True)
             temp_t = pd.merge(left=t_copy, right=recent_transactions, how='inner', on=['msno'])
             t = pd.concat((t, temp_t))
             t = t.sort_values(['transaction_date'], ascending=False).groupby('msno').first()
-
-            print("memory usage of t: ")
-            print(memory_usage(t))
-            print("memory usage of transactions: ")
-            print(memory_usage(transactions))
 
             i += 1
 
@@ -123,22 +112,23 @@ def make_csv(todo="train", path_to_data=path_to_data, transactions_chunk_size=de
 
         t["price_per_day"] = t["actual_amount_paid"]/(t["payment_plan_days"]+0.01)
 
-        # print("starting iteration, looking for usual price per day...")
-        # for transactions in df_iter:
-        #     print("i=" + str(i))
-        #     i += 1
-        #
-        #     transactions = reformat_transactions(transactions)
-        #     transactions["current_price_per_day"] = transactions["actual_amount_paid"] / (transactions["payment_plan_days"] + 0.01)
-        #     transactions = transactions.groupby("msno").sum()
-        #     columns_to_keep = ["current_price_per_day"]
-        #     transactions = transactions[columns_to_keep]
-        #
-        #     t = pd.merge(left=t, right=transactions, how='left', left_index=True, right_index=True)
-        #
-        #     t["current_price_per_day"] = t.current_price_per_day.apply(lambda x: int(x) if pd.notnull(x) else 0)
-        #     t["usual_price_per_day"] += t["current_price_per_day"]
-        #     t.drop(['current_price_per_day'], axis=1, inplace=True)
+        print("starting iteration, looking for usual price per day...")
+        for transactions in df_iter:
+            print("i=" + str(i))
+            i += 1
+
+            transactions = reformat_transactions(transactions)
+            transactions["current_price_per_day"] = transactions["actual_amount_paid"] / (
+            transactions["payment_plan_days"] + 0.01)
+            transactions = transactions.groupby("msno").sum()
+            columns_to_keep = ["current_price_per_day"]
+            transactions = transactions[columns_to_keep]
+
+            t = pd.merge(left=t, right=transactions, how='left', left_index=True, right_index=True)
+
+            t["current_price_per_day"] = t.current_price_per_day.apply(lambda x: int(x) if pd.notnull(x) else 0)
+            t["usual_price_per_day"] += t["current_price_per_day"]
+            t.drop(['current_price_per_day'], axis=1, inplace=True)
 
         return t
 
