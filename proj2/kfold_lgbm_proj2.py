@@ -60,19 +60,30 @@ kf = KFold(n_splits=K, random_state=42, shuffle=True)
 results = []
 weights = np.zeros(len(y_train))
 weights[y_train == 0] = 1
-weights[y_train == 1] = 2
+weights[y_train == 1] = 10
 
 print('Start training...')
 for train_index, test_index in kf.split(X_train):
-    lgb_train = lgb.Dataset(X_train[train_index], y_train[train_index], weight=weights[train_index])
-    lgb_eval = lgb.Dataset(X_train[test_index], y_train[test_index], reference=lgb_train, weight=weights[test_index])
-    gbm = lgb.train(params,
+    lgb_train = lgb.Dataset(
+        X_train[train_index],
+        y_train[train_index],
+        weight=weights[train_index]
+    )
+    lgb_eval = lgb.Dataset(
+        X_train[test_index],
+        y_train[test_index],
+        reference=lgb_train,
+        weight=weights[test_index]
+    )
+    gbm = lgb.train(
+        params,
         train_set=lgb_train,
         num_boost_round=200,
         valid_sets=lgb_eval,
         early_stopping_rounds=10,
         verbose_eval=5,
-        feval=log_loss_lgbm)
+        feval=log_loss_lgbm
+    )
     res = gbm.predict(X_test)
     i += 1
     results.append(res)

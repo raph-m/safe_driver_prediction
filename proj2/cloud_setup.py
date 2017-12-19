@@ -1,4 +1,6 @@
 import subprocess
+# how to setup the environment for cloud computing (install python tools and libraries, download database from
+# google drive public link and run python file)
 
 """
 sudo apt update
@@ -15,7 +17,6 @@ echo "source "/usr/bin/virtualenvwrapper.sh"" >> .bashrc
 echo "export WORKON_HOME="/opt/virtual_env/"" >> .bashrc
 source `which virtualenvwrapper.sh`
 mkvirtualenv -p /usr/bin/python3.5 ml1
-(ou sinon alias python=python3)
 sudo pip install pandas
 sudo pip install requests
 sudo pip install dotenv
@@ -56,10 +57,11 @@ cd safe_driver_prediction
 echo "ENV_NAME=vm" > .env
 cd proj2
 python feature_engineering.py
-sudo apt-get install build-essential
-pip install xgboost
 """
 
+# une autre façon de faire c'est avec `alias python=python3`
+
+# pour automatiser ces commandes, il faudrait mettre les commandes dans ce bashCommand et lancer ce script:
 bashCommand = "cwm --rdf test.rdf --ntriples > test.nt"
 process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
 output, error = process.communicate()
