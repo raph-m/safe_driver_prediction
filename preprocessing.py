@@ -6,7 +6,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from feature_selection_1 import get_cached_features
 
 
-def preproc(dataset, mode, oneHot, scale=False, scaler=None):
+def preproc(dataset, mode, oneHot, scale=False, scaler=None, feature_selection=False):
     # categorical and binary features
     categorical_features = [3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 19, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
                             33, 53, 54, 55, 56, 57, 58]
@@ -15,7 +15,11 @@ def preproc(dataset, mode, oneHot, scale=False, scaler=None):
     continuous_values = [2, 4, 15, 16, 20, 21, 22, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
                          51, 52]
 
-    feature_selection = "none"
+    if feature_selection:
+        feat = "infogain"
+    else :
+        feat = "none"
+        
     number_of_features = 10
     alpha = 32
     max_depth = 4
@@ -23,7 +27,7 @@ def preproc(dataset, mode, oneHot, scale=False, scaler=None):
     loss = "rank:pairwise"
     parameters = {
         "feature_selection": {
-            "name": feature_selection,
+            "name": feat,
             "number_of_features": number_of_features
         },
         "classifier": {
@@ -38,20 +42,30 @@ def preproc(dataset, mode, oneHot, scale=False, scaler=None):
         }
     }
 
-    if feature_selection == "infogain":
+    if feat == "infogain":
         categorical_features = get_cached_features(parameters["feature_selection"])
         continuous_values = []
 
     categorical_features_count = len(categorical_features)
 
-    if mode == 'train':
-        selected_features = categorical_features + continuous_values
-    elif mode == 'test':
-        selected_features = categorical_features + continuous_values
-        selected_features = np.array(selected_features) - 1
+    if not feature_selection:
+        if mode == 'train':
+            selected_features = categorical_features + continuous_values
+        elif mode == 'test':
+            selected_features = categorical_features + continuous_values
+            selected_features = np.array(selected_features) - 1
+        else:
+            Warning("Mode must be train or set, otherwise it will lead to local"
+                    " a variable referenced before assignment error")
     else:
-        Warning("Mode must be train or set, otherwise it will lead to local"
-                " a variable referenced before assignment error")
+        if mode == 'train':
+            selected_features = categorical_features
+        elif mode == 'test':
+            selected_features = categorical_features
+            selected_features = np.array(selected_features) - 1
+        else:
+            Warning("Mode must be train or set, otherwise it will lead to local"
+                    " a variable referenced before assignment error")
 
     X = dataset.iloc[:, selected_features].values
     y = dataset.iloc[:, 1].values
