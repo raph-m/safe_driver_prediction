@@ -102,11 +102,11 @@ def preproc(dataset, mode, oneHot, scale=False, scaler=None):
 
         X = X[:, mask]
 
-        if scale:
-            if scaler == None:
-                sc = StandardScaler()
-                X = sc.fit_transform(X)
-                return X, y, sc
-            else:
-                X = scaler.transform(X)
+    if scale:
+        if scaler == None:
+            sc = StandardScaler()
+            X = sc.fit_transform(X)
+            return X, y, sc
+        else:
+            X = scaler.transform(X)
     return X, y
