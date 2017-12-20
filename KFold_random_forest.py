@@ -34,14 +34,18 @@ results = []
 for train_index, test_index in kf.split(X_train):
     train_x, train_y = X_train[train_index], y_train[train_index]
     eval_x, eval_y = X_train[test_index], y_train[test_index]
-    classifier = RandomForestClassifier(n_estimators=10, criterion = 'gini', random_state = 0, max_features=1, class_weight=class_weight)
+    classifier = RandomForestClassifier(n_estimators=30, criterion = 'gini', random_state = 1, max_depth=5, max_features='auto', class_weight=class_weight)
     classifier.fit(train_x, train_y)
+    res_train = classifier.predict(train_x)
     res_eval = classifier.predict(eval_x)
     res = classifier.predict(X_test)
     results.append(res)
-    print('gini_eval', i)
-    gini_score = gini_normalized(eval_y, res_eval)
-    print(gini_score)
+    print('round k=',i)
+    print('eval gini score  ', 'train gini score')
+    gini_eval = gini_normalized(eval_y, res_eval)
+    gini_train = gini_normalized(train_y, res_train)
+    print(gini_eval,'  ', gini_train)
+    print()
     i+=1
 
 

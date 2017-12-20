@@ -1,7 +1,7 @@
 feature_selection = "infogain"
 number_of_features = 10
 batch_size = 4000
-epochs = 2
+epochs =10
 #layers = [177, 30, 10, 3, 1]
 layers = [177, 80, 20, 10, 1]
 dropout = [0.35, 0.15, 0.15]

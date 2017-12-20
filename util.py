@@ -31,3 +31,11 @@ def gini_lgbm(preds, dtrain):
     labels = dtrain.get_label()
     gini_score = gini_normalized(labels, preds)
     return 'gini', np.array(gini_score), True
+
+def to_csv(y_pred, ids, name):
+    import csv
+    with open(name, 'w') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=',')
+        spamwriter.writerow(['id', 'target'])
+        for i in range(len(y_pred)):
+            spamwriter.writerow([ids[i], y_pred[i]])
