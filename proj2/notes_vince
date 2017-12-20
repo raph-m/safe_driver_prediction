@@ -1,0 +1,6 @@
+1) Dire tout le preprocessing qu'on a fait.
+2) justifier un peu pourquoi on a pas regardé user_logs:
+    - on a deja pas mal galéré avec les fichiers de transactions alors avec le fat fichier de logs c'est pire
+    - il y a un kernel qui fait un peu de data exploration et qui ne voit pas de différence de distribution sur ce variables
+    - expliquer un peu le code 5k_fold_lightgbm
+    - en fait on obtient des très bons scores CV (Cross Validation), mais on obtient pas les mêmes score sur le Leaderboard. Je pense que c'est à cause de l'histoire de décalage des dates, il doit y avoir une histoire avec ça qui fait qu'on fait pas les bonnes prédictions (on fait 0.10 CV et 0.20 Leaderboard alors que normalement ça devrait être sensiblement le même score. Ensuite si on fait un drop_dates dans le fichier d'apprentissage, on récupère déjà des scores plus cohérents: 0.17 CV et 0.18 Leaderboard. Donc ça confirme ce que je pense sur les dates. Et régler ce problème pourrait déjà nous mener à de très bons résultats. (à suivre si on arrive à faire ça ou pas)

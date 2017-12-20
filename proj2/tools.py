@@ -55,4 +55,4 @@ def to_date(x):
 def log_loss_lgbm(preds, dtrain):
     labels = dtrain.get_label()
     loss = log_loss(labels, preds)
-    return 'log loss', np.array(loss), True
+    return 'log loss', np.array(loss), False

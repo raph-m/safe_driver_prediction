@@ -133,3 +133,5 @@ proj2/camboui.ipynb
 /submissions/5Kfold_lgbm.csv
 /submissions/sumbission_5Kfold_lgbm.csv
 y_pred_train
+/proj2/5Kfold_lgbm.csv
+/proj2/5Kfold_lgbm_drop_dates.csv
